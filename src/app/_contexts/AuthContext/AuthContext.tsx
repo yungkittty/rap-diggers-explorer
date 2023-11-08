@@ -1,3 +1,7 @@
 "use client";
 
-export { SessionProvider as AuthProvider } from "next-auth/react";
+import { SessionProvider, SessionProviderProps } from "next-auth/react";
+
+export const AuthProvider = (props: SessionProviderProps) => (
+  <SessionProvider {...props} />
+);
