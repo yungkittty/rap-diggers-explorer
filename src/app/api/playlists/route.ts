@@ -1,4 +1,5 @@
 import prisma from "@/app/_libs/prisma";
+import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
 import type {
   Page,
@@ -43,6 +44,8 @@ export const POST = withAuth(
       );
     }
 
+    const spotifyPlaylistId = playlist.id;
+
     let next = playlist.tracks.next;
     let offset = playlist.tracks.limit;
     const items = playlist.tracks.items;
@@ -50,7 +53,7 @@ export const POST = withAuth(
       let tracks: Page<PlaylistedTrack> | null = null;
       try {
         tracks = await spotifyApi.playlists.getPlaylistItems(
-          playlist.id,
+          spotifyPlaylistId,
           undefined,
           undefined,
           SPOTIFY_LIMIT_MAX,
@@ -67,74 +70,47 @@ export const POST = withAuth(
       next = tracks.next;
     }
 
-    const artistIds = new Set<string>([]);
+    const spotifyArtistIdsSet = new Set<string>([]);
     items.forEach((item) =>
       (item.track as SimplifiedTrack).artists.forEach(
-        (artist) => artistIds.add(artist.id), //
+        (artist) => spotifyArtistIdsSet.add(artist.id), //
       ),
     );
+    const spotifyArtistIds = Array.from(spotifyArtistIdsSet);
 
-    let spotifyId = playlist.id;
-    try {
-      await prisma.$transaction(async (tx) => {
-        const { id: playlistId } = await tx.playlist.upsert({
-          where: {
-            spotifyId,
-          },
-          create: {
-            spotifyId,
-          },
-          update: {},
-        });
+    await prisma.$transaction(async (tx) => {
+      const { id: playlistId } = await tx.playlist.upsert({
+        where: {
+          spotifyId: spotifyPlaylistId,
+        },
+        create: {
+          spotifyId: spotifyPlaylistId,
+        },
+        update: {},
+      });
 
-        await tx.playlistStatus.upsert({
-          where: {
-            userId_playlistId: {
-              userId,
-              playlistId,
-            },
-          },
-          create: {
+      // @TODO - This shouldn't allow to create more than one per user!
+      await tx.playlistStatus.upsert({
+        where: {
+          userId_playlistId: {
             userId,
             playlistId,
           },
-          update: {},
-        });
-
-        for (spotifyId of Array.from(artistIds)) {
-          const { id: artistId } = await tx.artist.upsert({
-            where: {
-              spotifyId,
-            },
-            create: {
-              spotifyId,
-            },
-            update: {},
-          });
-
-          await tx.artistStatus.upsert({
-            where: {
-              userId_artistId: {
-                userId,
-                artistId,
-              },
-            },
-            create: {
-              userId,
-              artistId,
-              playlistId,
-            },
-            update: {},
-          });
-        }
+        },
+        create: {
+          userId,
+          playlistId,
+        },
+        update: {},
       });
-    } catch (error) {
-      console.log(error);
-      return Response.json(
-        {}, //
-        { status: 500 },
+
+      await upsertArtistStatus(
+        tx, //
+        userId,
+        playlistId,
+        spotifyArtistIds,
       );
-    }
+    });
 
     return Response.json(
       {}, //

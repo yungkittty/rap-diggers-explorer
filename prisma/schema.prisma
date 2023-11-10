@@ -111,6 +111,12 @@ model PlaylistStatus {
 model ArtistStatus {
   id String @id @default(cuid())
 
+  dugInAt    DateTime?
+  dugOutAt   DateTime?
+  likedAt    DateTime?
+  dislikedAt DateTime?
+  snoozedAt  DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
