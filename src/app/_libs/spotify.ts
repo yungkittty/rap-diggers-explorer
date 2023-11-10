@@ -20,17 +20,21 @@ class NextAuthStrategy implements IAuthStrategy {
     this.account = account;
   }
 
+  public setConfiguration(configuration: SdkConfiguration): void {
+    console.warn("[Spotify-SDK][WARN]\nsetConfiguration not implemented");
+  }
+
   public getOrCreateAccessToken(): Promise<AccessToken> {
     return this.getAccessToken();
   }
 
   public async getAccessToken(): Promise<AccessToken> {
     const {
-      access_token,
       token_type,
+      access_token,
+      refresh_token,
       expires_in,
       expires_at: expires,
-      refresh_token,
     } = this.account;
     return {
       token_type,
@@ -44,12 +48,9 @@ class NextAuthStrategy implements IAuthStrategy {
   public removeAccessToken(): void {
     console.warn("[Spotify-SDK][WARN]\nremoveAccessToken not implemented");
   }
-  public setConfiguration(configuration: SdkConfiguration): void {
-    console.warn("[Spotify-SDK][WARN]\nsetConfiguration not implemented");
-  }
 }
 
-export const getSpotifyApi = (account: Account) => {
+export const getSpotifyApi = (account: Account): SpotifyApi => {
   const strategy = new NextAuthStrategy(account);
   return new SpotifyApi(strategy, {});
 };

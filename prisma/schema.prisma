@@ -58,10 +58,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  playlists    Playlist[]
-  artistStatus ArtistStatus[]
+  accounts Account[]
+  sessions Session[]
+
+  playlistStatus PlaylistStatus[]
+  artistStatus   ArtistStatus[]
 }
 
 model VerificationToken {
@@ -79,8 +80,8 @@ model Playlist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistStatus PlaylistStatus[]
+  artistStatus   ArtistStatus[]
 }
 
 model Artist {
@@ -93,16 +94,32 @@ model Artist {
   artistStatus ArtistStatus[]
 }
 
+model PlaylistStatus {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, playlistId])
+}
+
 model ArtistStatus {
   id String @id @default(cuid())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artistId String
-  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId   String
+  artist     Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId])
 }
