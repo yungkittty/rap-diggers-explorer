@@ -17,6 +17,7 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // This defines ...
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -50,6 +51,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+
+        // This defines ...
+        spotify: "#1DB954",
       },
       borderRadius: {
         lg: "var(--radius)",
