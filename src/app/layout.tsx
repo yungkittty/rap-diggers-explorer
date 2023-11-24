@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import "remixicon/fonts/remixicon.css";
 import { AuthProvider } from "./_contexts/AuthContext/AuthContext";
 import { auth } from "./_libs/auth";
 import { cn } from "./_libs/shadcn";

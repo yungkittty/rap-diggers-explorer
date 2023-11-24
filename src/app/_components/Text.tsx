@@ -8,12 +8,12 @@ export type TextProps = PropsWithChildren & {
 export const Text = (props: TextProps) => {
   const { className, ...others } = props;
   return (
-    <div
-      {...others} //
+    <p
       className={cn(
+        "select-none font-helvetica leading-snug tracking-tight", //
         className,
-        "select-none font-helvetica leading-none tracking-tight", //
       )}
+      {...others} //
     />
   );
 };
