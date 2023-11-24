@@ -9,12 +9,12 @@ import "./globals.css";
 const benzin = localFont({
   src: [
     {
-      path: "./_assets/fonts/Benzin-Regular.ttf",
+      path: "./_assets/fonts/benzin-regular.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "./_assets/fonts/Benzin-Bold.ttf",
+      path: "./_assets/fonts/benzin-bold.ttf",
       weight: "700",
       style: "normal",
     },
@@ -24,12 +24,12 @@ const benzin = localFont({
 const helvetica = localFont({
   src: [
     {
-      path: "./_assets/fonts/Helvetica-Regular.ttf",
+      path: "./_assets/fonts/helvetica-regular.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "./_assets/fonts/Helvetica-Bold.ttf",
+      path: "./_assets/fonts/helvetica-bold.ttf",
       weight: "700",
       style: "normal",
     },
