@@ -1,25 +1,26 @@
 import LogoSVG from "@/app/_assets/logo-black.svg";
-import { Image } from "../_components/Image";
 import { Heading } from "../_components/Heading";
+import { Image } from "../_components/Image";
+import { Card } from "../_components/ui/card";
 import { SpotifyButton } from "./_components/SpotifyButton";
 
-const SignIn = () => {
+const SignInPage = () => {
   return (
-    <div className="relative m-auto flex flex-col items-center justify-center ">
+    <div className="relative flex flex-col items-center justify-center m-auto">
       <Image
         className="absolute top-[-62px] ml-[-6px] rotate-2"
         src={LogoSVG}
-        width={190}
+        width={192}
         alt=""
       />
-      <div className="z-10 mb-[-8px] rounded-sm bg-foreground py-1 pl-2 pr-2.5">
-        <Heading className="text-xl italic text-white">explorer</Heading>
+      <div className="z-10 mb-[-6px] px-2 py-1 rounded-sm bg-foreground">
+        <Heading className="text-white">explorer</Heading>
       </div>
-      <div className="flex items-center justify-center rounded-full bg-foreground/20 p-4">
-        <SpotifyButton className="shadow" />
-      </div>
+      <Card className="p-3">
+        <SpotifyButton />
+      </Card>
     </div>
   );
 };
 
-export default SignIn;
+export default SignInPage;

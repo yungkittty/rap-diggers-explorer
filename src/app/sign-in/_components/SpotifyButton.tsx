@@ -1,31 +1,14 @@
 "use client";
 
-import { Button } from "@/app/_components/Button";
-import { Image } from "@/app/_components/Image";
+import { Icon } from "@/app/_components/Icon";
 import { Text } from "@/app/_components/Text";
-import LogoSpotifySVG from "../_assets/logo-spotify-white.svg";
-import { cn } from "@/app/_libs/shadcn";
+import { Button } from "@/app/_components/ui/button";
 
-type SpotifyButtonProps = { className?: string };
-
-export const SpotifyButton = (props: SpotifyButtonProps) => {
-  const { className } = props;
+export const SpotifyButton = () => {
   return (
-    <Button
-      className={cn(
-        className,
-        "relative flex rounded-full bg-spotify hover:bg-spotify/90",
-      )}
-      size="lg"
-    >
-      <Image
-        className="absolute left-3"
-        src={LogoSpotifySVG} //
-        width={24}
-        height={24}
-        alt=""
-      />
-      <Text className="ml-3 mr-[-8px] text-base font-bold uppercase">
+    <Button className="relative bg-spotify hover:bg-spotify/90" size="lg">
+      <Icon className="absolute left-3" name="spotify" />
+      <Text className="ml-3 mr-[-8px] font-bold uppercase">
         continuer avec spotify
       </Text>
     </Button>
