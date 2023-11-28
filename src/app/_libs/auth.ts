@@ -70,6 +70,9 @@ export const {
       return true;
     },
     async session(params) {
+      // @TODO - This should be handled!
+      // return { error: "" };
+
       const { user } = params;
 
       const userId = user.id;

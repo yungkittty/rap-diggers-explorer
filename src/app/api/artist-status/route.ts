@@ -26,12 +26,11 @@ export const PUT = withAuth(
     if (!InputSchema.safeParse(data).success) {
       return Response.json(
         {}, //
-        { status: 400 },
+        { status: 422 },
       );
     }
 
     const { artistId, action } = data as Input;
-
     const artistStatus = await prisma.artistStatus.findUnique({
       where: {
         userId_artistId: {

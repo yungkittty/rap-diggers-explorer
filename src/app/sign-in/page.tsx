@@ -2,6 +2,7 @@ import LogoSVG from "@/app/_assets/logo-black.svg";
 import { Heading } from "../_components/Heading";
 import { Image } from "../_components/Image";
 import { Card } from "../_components/ui/card";
+import { withAuth } from "../_hocs/auth";
 import { SpotifyButton } from "./_components/SpotifyButton";
 
 const SignInPage = () => {
@@ -23,4 +24,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default withAuth(SignInPage);

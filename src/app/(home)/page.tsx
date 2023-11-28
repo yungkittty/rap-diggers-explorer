@@ -1,3 +1,4 @@
+import { withAuth } from "../_hocs/auth";
 import { ActionsBar } from "./_components/ActionsBar";
 import { ArtistsCarousel } from "./_components/ArtistCardsCarousel";
 import { BottomBar } from "./_components/BottomBar";
@@ -16,4 +17,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default withAuth(HomePage);
