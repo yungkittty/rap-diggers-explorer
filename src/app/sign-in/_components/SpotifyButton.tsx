@@ -8,7 +8,10 @@ import { useCallback } from "react";
 
 export const SpotifyButton = () => {
   const handleClick = useCallback(() => {
-    signIn("spotify");
+    signIn(
+      "spotify", //
+      { callbackUrl: "/import" },
+    );
   }, []);
   return (
     <Button

@@ -2,9 +2,10 @@ import "next-auth";
 
 declare module "next-auth" {
   interface Session {
-    user: {
+    error?: string;
+    user?: {
       id: string;
     };
-    expires: ISODateString;
+    expires?: ISODateString;
   }
 }

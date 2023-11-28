@@ -16,16 +16,16 @@ export const {
     SpotifyProvider({
       clientId: SPOTIFY_CLIENT_ID,
       clientSecret: SPOTIFY_CLIENT_SECRET,
+      // This makes sure scope is the minimum required!
+      // https://developer.spotify.com/documentation/web-api/concepts/scopes
+      authorization: "https://accounts.spotify.com/authorize?scope=",
       account(tokens) {
-        // This allows to also return expires_in!
+        // This makes sure expires_in is also returned!
         return tokens;
       },
     }),
   ],
   callbacks: {
-    /*  */
-    /*  */
-    /*  */
     async signIn(params) {
       if (!params.account) {
         return false;
@@ -69,7 +69,6 @@ export const {
 
       return true;
     },
-    // @ts-expect-error - @TODO - This ...
     async session(params) {
       const { user } = params;
 
@@ -81,14 +80,12 @@ export const {
         },
       });
       if (accounts.length !== 1) {
-        return null; // @TODO - ...
+        return { error: "" }; // @TODO - This should be defined!
       }
       const account = accounts[0];
       const accountId = account.id;
 
-      // This ...
-      // @ts-expect-error - @TODO - This ...
-      if (account.expires_at * 1000 < Date.now()) {
+      if (account.expires_at! * 1000 < Date.now()) {
         const fetchAuthorization =
           "Basic " + //
             Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString("base64"); // prettier-ignore
@@ -98,10 +95,10 @@ export const {
             "Content-Type": "application/x-www-form-urlencoded",
             Authorization: fetchAuthorization,
           },
-          // @ts-expect-error - @TODO - This ...
           body: new URLSearchParams({
             grant_type: "refresh_token",
-            refresh_token: account.refresh_token,
+            refresh_token: account.refresh_token!,
+            client_id: SPOTIFY_CLIENT_ID,
           }),
         };
 
@@ -113,17 +110,18 @@ export const {
           scope: string;
         } | null = null;
         try {
-          console.log("fetching spotify refresh token...");
+          console.log("re-fetching spotify token...");
           const response = await fetch(
             "https://accounts.spotify.com/api/token", //
             fetchOptions,
           );
-          // @TODO - This can "throw" in silence!
-          // ... also, it isn't handled after that (as data is missing)!
+          if (response.status !== 200) {
+            return { error: "" }; // @TODO - This should be defined!
+          }
           data = await response.json();
-        } catch (error) {
-          console.log(error);
-          return null; // @TODO - ...
+        } catch {}
+        if (!data) {
+          return { error: "" }; // @TODO - This should be defined!
         }
 
         const {
@@ -131,7 +129,7 @@ export const {
           access_token,
           refresh_token,
           expires_in,
-        } = data!;
+        } = data;
         const expires_at = Math.floor(Date.now() / 1000 + expires_in);
         await prisma.account.update({
           data: {
@@ -155,8 +153,5 @@ export const {
         expires: session.expires,
       };
     },
-    /*  */
-    /*  */
-    /*  */
   },
 });

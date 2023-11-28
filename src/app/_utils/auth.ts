@@ -4,7 +4,6 @@ import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
 import { getSpotifyApi } from "../_libs/spotify";
 
-// @TODO - This can be removed as edge?
 export const withAuth =
   (
     callback: (
