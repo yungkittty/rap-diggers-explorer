@@ -1,3 +1,4 @@
+import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
 import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
@@ -10,6 +11,7 @@ import type {
 import { z } from "zod";
 
 const SPOTIFY_LIMIT_MAX = 50;
+const SPOTIFY_TOTAL_MAX = 5000;
 
 const InputSchema = z.object({
   playlistId: z.string(),
@@ -26,21 +28,41 @@ export const POST = withAuth(
     const data = await request.json();
     if (!InputSchema.safeParse(data).success) {
       return Response.json(
-        {}, //
-        { status: 400 },
+        { error: ErrorCode.INPUT_INVALID }, //
+        { status: 422 },
+      );
+    }
+
+    const playlistStatus = await prisma.playlistStatus.findMany({
+      select: {
+        id: true,
+      },
+      where: {
+        userId,
+      },
+    });
+    if (playlistStatus.length) {
+      return Response.json(
+        { error: ErrorCode.USER_FORBIDDEN_MAX_PLAYLISTS }, //
+        { status: 403 },
       );
     }
 
     const { playlistId } = data as Input;
-
     let playlist: Playlist | null = null;
     try {
       playlist = await spotifyApi.playlists.getPlaylist(playlistId);
     } catch (error) {
-      console.log(error);
       return Response.json(
-        {}, //
+        { error: ErrorCode.SPOTIFY_UNKNOWN }, //
         { status: 500 },
+      );
+    }
+
+    if (playlist.tracks.total > SPOTIFY_TOTAL_MAX) {
+      return Response.json(
+        { error: ErrorCode.USER_FORBIDDEN_MAX_TRACKS },
+        { status: 403 },
       );
     }
 
@@ -62,7 +84,7 @@ export const POST = withAuth(
       } catch (error) {
         console.log(error);
         return Response.json(
-          {}, //
+          { error: ErrorCode.SPOTIFY_UNKNOWN }, //
           { status: 500 },
         );
       }
@@ -89,7 +111,6 @@ export const POST = withAuth(
         update: {},
       });
 
-      // @TODO - This shouldn't allow to create more than one per user!
       await tx.playlistStatus.upsert({
         where: {
           userId_playlistId: {

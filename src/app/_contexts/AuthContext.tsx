@@ -2,6 +2,7 @@
 
 import { SessionProvider, SessionProviderProps } from "next-auth/react";
 
-export const AuthProvider = (props: SessionProviderProps) => (
+type AuthProviderProps = SessionProviderProps;
+export const AuthProvider = (props: AuthProviderProps) => (
   <SessionProvider {...props} />
 );

@@ -1,5 +1,6 @@
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { NextRequest, NextResponse } from "next/server";
+import { ErrorCode } from "../_constants/error-code";
 import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
 import { getSpotifyApi } from "../_libs/spotify";
@@ -20,9 +21,13 @@ export const withAuth =
     ]
   ): Promise<Response> => {
     const session = await auth();
-    if (!session) {
+    if (
+      !session || //
+      !session.user // ||
+      // session.error // @TODO - This should be changed!
+    ) {
       return Response.json(
-        {}, //
+        { error: ErrorCode.USER_UNAUTHORIZED },
         { status: 401 },
       );
     }
@@ -36,7 +41,7 @@ export const withAuth =
     });
     if (accounts.length !== 1) {
       return Response.json(
-        {}, //
+        { error: ErrorCode.USER_FORBIDDEN },
         { status: 403 },
       );
     }
