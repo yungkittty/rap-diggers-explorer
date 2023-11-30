@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "remixicon/fonts/remixicon.css";
 import { Toaster } from "./_components/ui/toaster";
 import { AuthProvider } from "./_contexts/AuthContext";
 import { DataProvider } from "./_contexts/DataContext";
@@ -22,6 +21,7 @@ const benzin = localFont({
     },
   ],
   variable: "--font-benzin",
+  preload: true,
 });
 const helvetica = localFont({
   src: [
@@ -37,6 +37,7 @@ const helvetica = localFont({
     },
   ],
   variable: "--font-helvetica",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -55,6 +56,13 @@ const RootLayout = async (props: RootLayoutProps) => {
 
   return (
     <html lang="en">
+      {/* https://github.com/Remix-Design/RemixIcon#cdn */}
+      <head>
+        <link
+          href="https://cdn.jsdelivr.net/npm/remixicon@3.6.0/fonts/remixicon.css"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={cn(
           "flex min-h-screen bg-background font-helvetica antialiased", //

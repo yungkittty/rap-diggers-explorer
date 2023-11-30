@@ -2,6 +2,7 @@
 
 import { Icon } from "@/app/_components/Icon";
 import { useToast } from "@/app/_components/ui/use-toast";
+import type { API_POSTPlaylistsInput } from "@/app/_types/api";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import useSWRMutation from "swr/mutation";
@@ -12,7 +13,7 @@ import { Input } from "../../_components/ui/input";
 
 const createPlaylist = async (
   url: string, //
-  { arg: { playlistId } }: { arg: { playlistId: string } },
+  { arg: { spotifyPlaylistId } }: { arg: API_POSTPlaylistsInput },
 ): Promise<{ error?: "string" | null }> => {
   const fetchOptions = {
     method: "POST", //
@@ -21,7 +22,7 @@ const createPlaylist = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      playlistId,
+      spotifyPlaylistId,
     }),
   };
   return fetch(url, fetchOptions).then((response) => response.json());
@@ -45,7 +46,7 @@ export const FormFooter = () => {
   const handleClick = useCallback(
     async () => {
       try {
-        const data = await trigger({ playlistId: value });
+        const data = await trigger({ spotifyPlaylistId: value });
         if (!data.error) {
           router.replace("/");
           return;

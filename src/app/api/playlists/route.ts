@@ -1,5 +1,7 @@
 import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
+import type { API_POSTPlaylistsInput } from "@/app/_types/api";
+import { API_POSTPlaylistsInputSchema } from "@/app/_types/api";
 import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
 import type {
@@ -8,15 +10,9 @@ import type {
   PlaylistedTrack,
   SimplifiedTrack,
 } from "@spotify/web-api-ts-sdk";
-import { z } from "zod";
 
 const SPOTIFY_LIMIT_MAX = 50;
 const SPOTIFY_TOTAL_MAX = 5000;
-
-const InputSchema = z.object({
-  playlistId: z.string(),
-});
-type Input = z.infer<typeof InputSchema>;
 
 export const POST = withAuth(
   async (
@@ -26,7 +22,7 @@ export const POST = withAuth(
     spotifyApi,
   ) => {
     const data = await request.json();
-    if (!InputSchema.safeParse(data).success) {
+    if (!API_POSTPlaylistsInputSchema.safeParse(data).success) {
       return Response.json(
         { error: ErrorCode.INPUT_INVALID }, //
         { status: 422 },
@@ -48,10 +44,11 @@ export const POST = withAuth(
       );
     }
 
-    const { playlistId } = data as Input;
-    let playlist: Playlist | null = null;
+    const { spotifyPlaylistId } = data as API_POSTPlaylistsInput;
+    let spotifyPlaylist: Playlist | null = null;
     try {
-      playlist = await spotifyApi.playlists.getPlaylist(playlistId);
+      spotifyPlaylist =
+        await spotifyApi.playlists.getPlaylist(spotifyPlaylistId);
     } catch (error) {
       return Response.json(
         { error: ErrorCode.SPOTIFY_UNKNOWN }, //
@@ -59,22 +56,20 @@ export const POST = withAuth(
       );
     }
 
-    if (playlist.tracks.total > SPOTIFY_TOTAL_MAX) {
+    if (spotifyPlaylist.tracks.total > SPOTIFY_TOTAL_MAX) {
       return Response.json(
         { error: ErrorCode.USER_FORBIDDEN_MAX_TRACKS },
         { status: 403 },
       );
     }
 
-    const spotifyPlaylistId = playlist.id;
-
-    let next = playlist.tracks.next;
-    let offset = playlist.tracks.limit;
-    const items = playlist.tracks.items;
+    let next = spotifyPlaylist.tracks.next;
+    let offset = spotifyPlaylist.tracks.limit;
+    const items = spotifyPlaylist.tracks.items;
     for (; next !== null; offset += SPOTIFY_LIMIT_MAX) {
-      let tracks: Page<PlaylistedTrack> | null = null;
+      let spotifyTracks: Page<PlaylistedTrack> | null = null;
       try {
-        tracks = await spotifyApi.playlists.getPlaylistItems(
+        spotifyTracks = await spotifyApi.playlists.getPlaylistItems(
           spotifyPlaylistId,
           undefined,
           undefined,
@@ -88,8 +83,8 @@ export const POST = withAuth(
           { status: 500 },
         );
       }
-      items.push(...tracks.items);
-      next = tracks.next;
+      items.push(...spotifyTracks.items);
+      next = spotifyTracks.next;
     }
 
     const spotifyArtistIdsSet = new Set<string>([]);
