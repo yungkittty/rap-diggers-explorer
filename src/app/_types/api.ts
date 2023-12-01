@@ -5,22 +5,20 @@ type API_Ouput = {
 };
 
 //
-// API - api/playlists
+// API/POST - api/playlists
 //
 
-export const API_POSTPlaylistsInputSchema = z.object({
+export const POST_PlaylistsInputSchema = z.object({
   spotifyPlaylistId: z.string(),
 });
-export type API_POSTPlaylistsInput = z.infer<
-  typeof API_POSTPlaylistsInputSchema
->;
-export type API_POSTPlaylistsOutput = API_Ouput & {};
+export type POST_PlaylistsInput = z.infer<typeof POST_PlaylistsInputSchema>;
+export type POST_PlaylistsOutput = API_Ouput & {};
 
 //
-// API - /api/artist-status
+// API/GET - /api/artist-status
 //
 
-export type API_GETArtistStatusOuputDataItem = {
+export type GET_ArtistStatusOuputDataItem = {
   id: string;
   artist: {
     spotifyId: string;
@@ -31,6 +29,22 @@ export type API_GETArtistStatusOuputDataItem = {
     spotifyImageB_Url?: string;
   };
 };
-export type API_GETArtistStatusOuput = API_Ouput & {
-  data?: API_GETArtistStatusOuputDataItem[];
+export type GET_ArtistStatusOuput = API_Ouput & {
+  data?: GET_ArtistStatusOuputDataItem[];
 };
+
+//
+// API/PUT - /api/artist-status
+//
+
+export const PUT_ArtistStatusInputSchema = z.object({
+  action: z.union([
+    z.literal("dig-in"), //
+    z.literal("dig-out"),
+    z.literal("like"),
+    z.literal("dislike"),
+    z.literal("snooze"),
+  ]),
+});
+export type PUT_ArtistStatusInput = z.infer<typeof PUT_ArtistStatusInputSchema>;
+export type PUT_ArtistStatusOutput = API_Ouput & {};

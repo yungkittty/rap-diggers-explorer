@@ -11,16 +11,15 @@ export const upsertArtistStatus = async (
     | "$extends"
   >,
   userId: string,
-  playlistId: string,
-  spotifyIds: string[],
+  spotifyArtistIds: string[],
 ): Promise<void> => {
-  for (const spotifyId of spotifyIds) {
+  for (const spotifyArtistId of spotifyArtistIds) {
     const { id: artistId } = await tx.artist.upsert({
       where: {
-        spotifyId,
+        spotifyId: spotifyArtistId,
       },
       create: {
-        spotifyId,
+        spotifyId: spotifyArtistId,
       },
       update: {},
     });
@@ -35,7 +34,6 @@ export const upsertArtistStatus = async (
       create: {
         userId,
         artistId,
-        playlistId,
       },
       update: {},
     });

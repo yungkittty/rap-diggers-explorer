@@ -1,7 +1,7 @@
 import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
-import type { API_POSTPlaylistsInput } from "@/app/_types/api";
-import { API_POSTPlaylistsInputSchema } from "@/app/_types/api";
+import type { POST_PlaylistsInput } from "@/app/_types/api";
+import { POST_PlaylistsInputSchema } from "@/app/_types/api";
 import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
 import type {
@@ -17,15 +17,15 @@ const SPOTIFY_TOTAL_MAX = 5000;
 export const POST = withAuth(
   async (
     request, //
-    response,
+    _,
     userId,
     spotifyApi,
   ) => {
     const data = await request.json();
-    if (!API_POSTPlaylistsInputSchema.safeParse(data).success) {
+    if (!POST_PlaylistsInputSchema.safeParse(data).success) {
       return Response.json(
         { error: ErrorCode.INPUT_INVALID }, //
-        { status: 422 },
+        { status: 400 },
       );
     }
 
@@ -44,7 +44,7 @@ export const POST = withAuth(
       );
     }
 
-    const { spotifyPlaylistId } = data as API_POSTPlaylistsInput;
+    const { spotifyPlaylistId } = data as POST_PlaylistsInput;
     let spotifyPlaylist: Playlist | null = null;
     try {
       spotifyPlaylist =
@@ -123,7 +123,6 @@ export const POST = withAuth(
       await upsertArtistStatus(
         tx, //
         userId,
-        playlistId,
         spotifyArtistIds,
       );
     });

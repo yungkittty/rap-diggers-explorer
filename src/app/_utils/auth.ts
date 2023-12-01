@@ -1,5 +1,5 @@
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import type { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { ErrorCode } from "../_constants/error-code";
 import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
@@ -9,7 +9,7 @@ export const withAuth =
   (
     callback: (
       request: NextRequest, //
-      response: NextResponse,
+      { params }: { params: { [key: string]: string } },
       userId: string,
       spotifyApi: SpotifyApi,
     ) => Promise<Response>,
@@ -17,7 +17,7 @@ export const withAuth =
   async (
     ...args: [
       NextRequest, //
-      NextResponse,
+      { params: { [key: string]: string } },
     ]
   ): Promise<Response> => {
     const session = await auth();

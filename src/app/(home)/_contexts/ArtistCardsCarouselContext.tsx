@@ -1,8 +1,8 @@
 "use client";
 
 import type {
-  API_GETArtistStatusOuput,
-  API_GETArtistStatusOuputDataItem,
+  GET_ArtistStatusOuput,
+  GET_ArtistStatusOuputDataItem,
 } from "@/app/_types/api";
 import React, { PropsWithChildren, useState } from "react";
 import useSWR from "swr";
@@ -12,7 +12,7 @@ import {
 } from "../_components/ArtistCardsCarousel";
 
 export const ArtistCardsCarouselContext = React.createContext<{
-  artistStatus: (API_GETArtistStatusOuputDataItem | null)[];
+  artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
   nextArtistStatus: () => void;
 }>({
   artistStatus: [],
@@ -20,13 +20,14 @@ export const ArtistCardsCarouselContext = React.createContext<{
 });
 
 // @TODO - This should handle erros!
+// @TODO - This should handle offset!
 export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
   const [artistStatus, setArtistStatus] = useState<
-    (API_GETArtistStatusOuputDataItem | null)[]
+    (GET_ArtistStatusOuputDataItem | null)[]
   >(Array(ARTIST_CARDS_CAROUSEL_OFFSET).fill(null));
 
   // @TODO - This should handle end-of-list!
-  const handleSuccess = (data: API_GETArtistStatusOuput) => {
+  const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: loadedArtistStatus = [] } = data;
     setArtistStatus((previousArtistStatus) => [
       ...previousArtistStatus, //

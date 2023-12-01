@@ -1,20 +1,29 @@
+"use client";
+
 import { Icon } from "@/app/_components/Icon";
-import { Button } from "@/app/_components/ui/button";
+import { Button, ButtonProps } from "@/app/_components/ui/button";
 import { cn } from "@/app/_libs/shadcn";
 
-type ActionsBarButtonProps = {
+type ActionButtonProps = {
   className?: string;
   classNameIcon?: string;
   iconName: string;
   size?: "large" | "medium" | "small";
+  onClick: () => void;
 };
-const ActionsBarButton = (props: ActionsBarButtonProps) => {
+const ActionButton = (props: ActionButtonProps) => {
   const {
     className,
     classNameIcon: _classNameIcon = "",
     size = "large",
     iconName,
+    onClick,
   } = props;
+
+  let variant: ButtonProps["variant"] = "secondary";
+  if (size === "small") {
+    variant = "outline";
+  }
 
   const classNameButton = cn({
     "w-20": size === "large",
@@ -29,11 +38,13 @@ const ActionsBarButton = (props: ActionsBarButtonProps) => {
 
   return (
     <Button
+      variant={variant}
       className={cn(
         "rounded-full h-[unset] aspect-square",
         className,
         classNameButton,
       )}
+      onClick={onClick}
     >
       <Icon
         className={classNameIcon} //
@@ -46,32 +57,33 @@ const ActionsBarButton = (props: ActionsBarButtonProps) => {
 
 type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
+  const handleClick = () => {};
   return (
     <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center py-12">
-      <ActionsBarButton
-        className="bg-gray-300 hover:bg-gray-300/90" //
-        iconName="check"
+      <ActionButton
+        iconName="check" //
         size="small"
+        onClick={handleClick}
       />
-      <ActionsBarButton
-        className="bg-green-400 hover:bg-green-400/90" //
+      <ActionButton
         classNameIcon="relative bottom-[-2px]"
         iconName="heart"
+        onClick={handleClick}
       />
-      <ActionsBarButton
-        className="bg-orange-400 hover:bg-orange-400/90" //
-        iconName="time"
+      <ActionButton
+        iconName="time" //
         size="medium"
+        onClick={handleClick}
       />
-      <ActionsBarButton
-        className="bg-red-400 hover:bg-red-400/90" //
-        classNameIcon="relative bottom-[-2px]"
+      <ActionButton
+        classNameIcon="relative bottom-[-1px] left-[-1px]"
         iconName="dislike"
+        onClick={handleClick}
       />
-      <ActionsBarButton
-        className="bg-gray-300 hover:bg-gray-300/90" //
-        iconName="close"
+      <ActionButton
+        iconName="close" //
         size="small"
+        onClick={handleClick}
       />
     </div>
   );

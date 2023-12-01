@@ -81,7 +81,6 @@ model Playlist {
   updatedAt DateTime @updatedAt
 
   playlistStatus PlaylistStatus[]
-  artistStatus   ArtistStatus[]
 }
 
 model Artist {
@@ -120,12 +119,10 @@ model ArtistStatus {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artistId   String
-  artist     Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  playlistId String
-  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId])
 }

@@ -2,7 +2,7 @@
 
 import { Icon } from "@/app/_components/Icon";
 import { useToast } from "@/app/_components/ui/use-toast";
-import type { API_POSTPlaylistsInput } from "@/app/_types/api";
+import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import useSWRMutation from "swr/mutation";
@@ -13,7 +13,7 @@ import { Input } from "../../_components/ui/input";
 
 const createPlaylist = async (
   url: string, //
-  { arg: { spotifyPlaylistId } }: { arg: API_POSTPlaylistsInput },
+  { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsInput },
 ): Promise<{ error?: "string" | null }> => {
   const fetchOptions = {
     method: "POST", //
