@@ -5,43 +5,68 @@ import type {
   GET_ArtistStatusOuputDataItem,
 } from "@/app/_types/api";
 import React, { PropsWithChildren, useState } from "react";
-import useSWR from "swr";
+import useSWRImmutable from "swr/immutable";
 import {
   ARTIST_CARDS_CAROUSEL_OFFSET,
   ARTIST_CARDS_CAROUSEL_SIZE,
 } from "../_components/ArtistCardsCarousel";
 
+const getArtistStatus = async ([url]: [string, number]): //
+Promise<GET_ArtistStatusOuput> => {
+  const fetchOptions = {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  };
+  return fetch(url, fetchOptions).then((response) => response.json());
+};
+
 export const ArtistCardsCarouselContext = React.createContext<{
+  artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
   artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
   nextArtistStatus: () => void;
 }>({
+  artistStatusCurrent: null,
   artistStatus: [],
   nextArtistStatus: () => {},
 });
 
-// @TODO - This should handle erros!
-// @TODO - This should handle offset!
 export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
   const [artistStatus, setArtistStatus] = useState<
     (GET_ArtistStatusOuputDataItem | null)[]
   >(Array(ARTIST_CARDS_CAROUSEL_OFFSET).fill(null));
 
-  // @TODO - This should handle end-of-list!
+  const artistStatusCurrent =
+    artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
+
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
-    const { data: loadedArtistStatus = [] } = data;
+    const { data: nextArtistStatus = [] } = data;
     setArtistStatus((previousArtistStatus) => [
       ...previousArtistStatus, //
-      ...loadedArtistStatus,
+      ...nextArtistStatus,
     ]);
   };
 
   // This makes sure cache is ignored (as status are updated)!
   // https://github.com/vercel/swr/discussions/456#discussioncomment-25602
-  const [random, setRandom] = useState(Date.now());
-  useSWR(
-    [`/api/artist-status?limit=${ARTIST_CARDS_CAROUSEL_SIZE}`, random], //
+  const [
+    [offset, offsetId], //
+    setOffset,
+  ] = useState<[number, string | null]>([0, null]);
+  const url =
+    "/api/artist-status?" +
+    new URLSearchParams({
+      offset: String(offset),
+      limit: String(ARTIST_CARDS_CAROUSEL_SIZE),
+    }).toString();
+  useSWRImmutable(
+    [url, offsetId], //
+    getArtistStatus,
     { onSuccess: handleSuccess },
   );
+
   const nextArtistStatus = () => {
     setArtistStatus((previousArtistStatus) => {
       const [, ...nextArtistStatus] = previousArtistStatus;
@@ -49,7 +74,11 @@ export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
         nextArtistStatus.length <=
         ARTIST_CARDS_CAROUSEL_SIZE + ARTIST_CARDS_CAROUSEL_OFFSET
       ) {
-        setRandom(Date.now());
+        const nextOffset = nextArtistStatus
+          .slice(ARTIST_CARDS_CAROUSEL_OFFSET)
+          .filter(Boolean).length;
+        const nextOffsetId = nextArtistStatus.at(-1)?.id || null;
+        setOffset([nextOffset, nextOffsetId]);
       }
       return nextArtistStatus;
     });
@@ -59,6 +88,7 @@ export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
     <ArtistCardsCarouselContext.Provider
       {...props} //
       value={{
+        artistStatusCurrent,
         artistStatus,
         nextArtistStatus,
       }}
