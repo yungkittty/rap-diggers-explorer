@@ -18,6 +18,11 @@ export type POST_PlaylistsOutput = API_Ouput & {};
 // API/GET - /api/artist-status
 //
 
+export type GET_ArtistStatusOuputDataItemTrack = {
+  spotifyUrl: string;
+  spotifyNames: string[];
+  spotifyReleaseDate: string;
+};
 export type GET_ArtistStatusOuputDataItem = {
   id: string;
   artist: {
@@ -27,6 +32,7 @@ export type GET_ArtistStatusOuputDataItem = {
     spotifyUrl: string;
     spotifyImageP_Url?: string;
     spotifyImageB_Url?: string;
+    spotifyTracks: GET_ArtistStatusOuputDataItemTrack[];
   };
 };
 export type GET_ArtistStatusOuput = API_Ouput & {

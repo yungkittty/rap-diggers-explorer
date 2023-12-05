@@ -4,6 +4,9 @@ import { GET_ArtistStatusOuputDataItem } from "@/app/_types/api";
 import { withAuth } from "@/app/_utils/auth";
 import { Artist, Image } from "@spotify/web-api-ts-sdk";
 
+const SPOTIFY_ALBUMS_LIMIT_MAX = 5;
+const SPOTIFY_TRACKS_LIMIT_MAX = 50;
+
 const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
 const GET_ARTIST_STATUS_DEFAULT_LIMIT = 10;
 
@@ -78,11 +81,24 @@ export const GET = withAuth(
             artistStatus, //
             artistStatusIndex,
           ) => {
-            // This ...
             const spotifyArtist = spotifyArtists[artistStatusIndex];
 
-            const { tracks: spotifyTracks } = // prettier-ignore
-              await spotifyApi.artists.topTracks(spotifyArtist.id, "FR");
+            const { items: spotifyAlbums } = await spotifyApi.artists.albums(
+              spotifyArtist.id,
+              "single,album",
+              "FR", // @TODO - ... ("FR")!
+              SPOTIFY_ALBUMS_LIMIT_MAX,
+            );
+            const spotifyTracksPerAlbum = await Promise.all(
+              spotifyAlbums.map(async (spotifyAlbum) => {
+                const { items: spotifyTracks } = await spotifyApi.albums.tracks(
+                  spotifyAlbum.id,
+                  "FR", // @TODO - ... ("FR")!
+                  SPOTIFY_TRACKS_LIMIT_MAX,
+                );
+                return spotifyTracks;
+              }),
+            );
 
             const getSpotifyImageP_Url = (images: Image[]) =>
               images.find((image) => image.width / image.height === 1)?.url;
@@ -98,6 +114,25 @@ export const GET = withAuth(
                 spotifyUrl: spotifyArtist.external_urls["spotify"],
                 spotifyImageP_Url: getSpotifyImageP_Url(spotifyArtist.images),
                 spotifyImageB_Url: getSpotifyImageB_Url(spotifyArtist.images),
+                spotifyTracks: spotifyAlbums.reduce(
+                  (spotifyTracks, spotifyAlbum, spotifyAlbumIndex) => {
+                    return [
+                      ...spotifyTracks,
+                      ...spotifyTracksPerAlbum[spotifyAlbumIndex]
+                        .filter(
+                          (spotifyTrack) =>
+                            spotifyTrack.is_playable &&
+                            spotifyTrack.preview_url != null,
+                        )
+                        .map((spotifyTrack) => ({
+                          spotifyUrl: spotifyTrack.preview_url!,
+                          spotifyNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
+                          spotifyReleaseDate: spotifyAlbum.release_date,
+                        })),
+                    ];
+                  },
+                  [] as GET_ArtistStatusOuputDataItem["artist"]["spotifyTracks"],
+                ),
               },
             };
           },

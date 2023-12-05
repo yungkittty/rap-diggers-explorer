@@ -43,8 +43,8 @@ export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
 
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: nextArtistStatus = [] } = data;
-    setArtistStatus((previousArtistStatus) => [
-      ...previousArtistStatus, //
+    setArtistStatus((prevArtistStatus) => [
+      ...prevArtistStatus, //
       ...nextArtistStatus,
     ]);
   };
@@ -68,8 +68,8 @@ export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
   );
 
   const nextArtistStatus = () => {
-    setArtistStatus((previousArtistStatus) => {
-      const [, ...nextArtistStatus] = previousArtistStatus;
+    setArtistStatus((prevArtistStatus) => {
+      const [, ...nextArtistStatus] = prevArtistStatus;
       if (
         nextArtistStatus.length <=
         ARTIST_CARDS_CAROUSEL_SIZE + ARTIST_CARDS_CAROUSEL_OFFSET
