@@ -2,7 +2,15 @@
 
 import { Icon } from "@/app/_components/Icon";
 import { Button, ButtonProps } from "@/app/_components/ui/button";
+import { useToast } from "@/app/_components/ui/use-toast";
 import { cn } from "@/app/_libs/shadcn";
+import {
+  PUT_ArtistStatusInput,
+  PUT_ArtistStatusOutput,
+} from "@/app/_types/api";
+import { useContext } from "react";
+import useSWRMutation from "swr/mutation";
+import { ArtistCardsCarouselContext } from "../_contexts/ArtistCardsCarouselContext";
 
 type ActionButtonProps = {
   className?: string;
@@ -55,35 +63,86 @@ const ActionButton = (props: ActionButtonProps) => {
   );
 };
 
+const updateArtistStatus = async (
+  url: string,
+  { arg: { action } }: { arg: PUT_ArtistStatusInput },
+): Promise<PUT_ArtistStatusOutput> => {
+  const fetchOptions = {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action,
+    }),
+  };
+  return fetch(url, fetchOptions).then((response) => response.json());
+};
+
 type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
-  const handleClick = () => {};
+  const {
+    artistStatusCurrent, //
+    nextArtistStatus,
+  } = useContext(ArtistCardsCarouselContext);
+
+  const { toast } = useToast();
+  const artistStatusId = artistStatusCurrent?.id;
+  const { trigger, isMutating } = useSWRMutation(
+    `/api/artist-status/${artistStatusId}`, //
+    updateArtistStatus,
+  );
+  const getHandleClick =
+    (action: PUT_ArtistStatusInput["action"]) => async () => {
+      if (!artistStatusId || isMutating) {
+        return;
+      }
+      try {
+        // @TODO - ... (null)!
+        const data = await trigger({ action });
+        if (!data.error) {
+          nextArtistStatus();
+          return;
+        }
+      } catch (error) {
+        if (process.env.VERCEL_ENV !== "production") {
+          console.log(error);
+        }
+      }
+      // @TODO - ...
+      toast({
+        title: "",
+        description: "",
+      });
+    };
+
   return (
     <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center py-12">
       <ActionButton
         iconName="check" //
         size="small"
-        onClick={handleClick}
+        onClick={getHandleClick("dig-in")}
       />
       <ActionButton
         classNameIcon="relative bottom-[-2px]"
         iconName="heart"
-        onClick={handleClick}
+        onClick={getHandleClick("like")}
       />
       <ActionButton
         iconName="time" //
         size="medium"
-        onClick={handleClick}
+        onClick={getHandleClick("snooze")}
       />
       <ActionButton
         classNameIcon="relative bottom-[-1px] left-[-1px]"
         iconName="dislike"
-        onClick={handleClick}
+        onClick={getHandleClick("dislike")}
       />
       <ActionButton
         iconName="close" //
         size="small"
-        onClick={handleClick}
+        onClick={getHandleClick("dig-out")}
       />
     </div>
   );

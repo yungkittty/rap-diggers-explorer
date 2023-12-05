@@ -17,10 +17,9 @@ export const GET = withAuth(
     userId,
     spotifyApi,
   ) => {
-    // @TODO - This should be handled (for offset management)!
-    // const searchParams = request.nextUrl.searchParams;
-    const offset = /* Number(searchParams.get("offset")) || */ GET_ARTIST_STATUS_DEFAULT_OFFSET; // prettier-ignore
-    const limit = /* Number(searchParams.get("limit")) || */ GET_ARTIST_STATUS_DEFAULT_LIMIT; // prettier-ignore
+    const searchParams = request.nextUrl.searchParams;
+    const offset = Number(searchParams.get("offset")) || GET_ARTIST_STATUS_DEFAULT_OFFSET; // prettier-ignore
+    const limit = Number(searchParams.get("limit")) || GET_ARTIST_STATUS_DEFAULT_LIMIT; // prettier-ignore
     // const filters = "all";
 
     const artistStatus = await prisma.artistStatus.findMany({
@@ -42,9 +41,10 @@ export const GET = withAuth(
         dislikedAt: null,
         snoozedAt: null,
       },
-      orderBy: {
-        createdAt: "asc",
-      },
+      orderBy: [
+        { createdAt: "asc" }, //
+        { artist: { spotifyId: "asc" } },
+      ],
       skip: offset,
       take: limit,
     });
