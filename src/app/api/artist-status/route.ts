@@ -126,7 +126,8 @@ export const GET = withAuth(
                         )
                         .map((spotifyTrack) => ({
                           spotifyUrl: spotifyTrack.preview_url!,
-                          spotifyNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
+                          spotifyName: spotifyTrack.name,
+                          spotifyArtistNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
                           spotifyReleaseDate: spotifyAlbum.release_date,
                         })),
                     ];
