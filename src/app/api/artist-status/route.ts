@@ -100,10 +100,10 @@ export const GET = withAuth(
               }),
             );
 
-            const getSpotifyImageP_Url = (images: Image[]) =>
+            const getSpotifyImageHighUrl = (images: Image[]) =>
               images.find((image) => image.width / image.height === 1)?.url;
-            const getSpotifyImageB_Url = (images: Image[]) =>
-              images.find((image) => image.width / image.height > 1)?.url;
+            const getSpotifyImageLowUrl = (images: Image[]) =>
+              images.findLast((image) => image.width / image.height === 1)?.url;
 
             return {
               id: artistStatus.id,
@@ -112,8 +112,7 @@ export const GET = withAuth(
                 spotifyName: spotifyArtist.name,
                 spotifyFollowersTotal: spotifyArtist.followers.total,
                 spotifyUrl: spotifyArtist.external_urls["spotify"],
-                spotifyImageP_Url: getSpotifyImageP_Url(spotifyArtist.images),
-                spotifyImageB_Url: getSpotifyImageB_Url(spotifyArtist.images),
+                spotifyImageUrl: getSpotifyImageHighUrl(spotifyArtist.images),
                 spotifyTracks: spotifyAlbums.reduce(
                   (spotifyTracks, spotifyAlbum, spotifyAlbumIndex) => {
                     return [
@@ -126,6 +125,7 @@ export const GET = withAuth(
                         )
                         .map((spotifyTrack) => ({
                           spotifyUrl: spotifyTrack.preview_url!,
+                          spotifyImageUrl: getSpotifyImageLowUrl(spotifyAlbum.images), // prettier-ignore
                           spotifyName: spotifyTrack.name,
                           spotifyArtistNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
                           spotifyReleaseDate: spotifyAlbum.release_date,
