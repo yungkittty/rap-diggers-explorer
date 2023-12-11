@@ -3,19 +3,19 @@ import { ActionsBar } from "./_components/ActionsBar";
 import { ArtistCardsCarousel } from "./_components/ArtistCardsCarousel";
 import { BottomBar } from "./_components/BottomBar/BottomBar";
 import { TopBar } from "./_components/TopBar";
-import { ArtistCardsCarouselProvider } from "./_contexts/ArtistCardsCarouselContext";
+import { ArtistsStatusContextProvider } from "./_contexts/ArtistStatusContext";
 
 const HomePage = () => {
   return (
     <div className="flex flex-col flex-1">
       <TopBar />
-      <ArtistCardsCarouselProvider>
+      <ArtistsStatusContextProvider>
         <div className="flex flex-col flex-1 justify-end">
           <ArtistCardsCarousel />
           <ActionsBar />
         </div>
         <BottomBar />
-      </ArtistCardsCarouselProvider>
+      </ArtistsStatusContextProvider>
     </div>
   );
 };

@@ -2,7 +2,7 @@
 
 import { cn } from "@/app/_libs/shadcn";
 import { useContext } from "react";
-import { ArtistCardsCarouselContext } from "../_contexts/ArtistCardsCarouselContext";
+import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
 import { ArtistCard } from "./ArtistCard";
 
 export const ARTIST_CARDS_CAROUSEL_SIZE = 7;
@@ -10,7 +10,7 @@ export const ARTIST_CARDS_CAROUSEL_OFFSET = 3;
 
 type ArtistCardsCarouselProps = {};
 export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
-  const { artistStatus } = useContext(ArtistCardsCarouselContext);
+  const { artistStatus } = useContext(ArtistsStatusContext);
 
   return (
     <div className="flex flex-row flex-1 pt-12 overflow-hidden">

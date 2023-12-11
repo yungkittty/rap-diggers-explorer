@@ -12,7 +12,7 @@ const SignInPage = () => {
         className="absolute top-[-62px] ml-[-6px] rotate-2"
         src={LogoSVG}
         width={192}
-        alt=""
+        alt="" // @TODO - ...
       />
       <div className="z-10 mb-[-6px] px-2 py-1 rounded-sm bg-foreground">
         <Heading className="text-white">explorer</Heading>

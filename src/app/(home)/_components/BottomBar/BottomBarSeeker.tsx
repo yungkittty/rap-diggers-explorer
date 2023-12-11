@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { BottomBarContext } from "./_contexts/BottomBarContext";
+import { TracksContext } from "./_contexts/TracksContext";
 import { useEffectEvent } from "./_hooks/useEffectEvent";
 
 export const BottomBarSeeker = (props: PropsWithChildren) => {
@@ -18,7 +18,7 @@ export const BottomBarSeeker = (props: PropsWithChildren) => {
     setIsSeeking,
     trackCurrentMetadata,
     seekTrackToPercentage,
-  } = useContext(BottomBarContext);
+  } = useContext(TracksContext);
   const trackCurrentDuration = trackCurrentMetadata?.duration ?? 1;
   const trackCurrentTime = trackCurrentMetadata?.currentTime ?? 0;
   const trackCurrentTimePct = Math.round(

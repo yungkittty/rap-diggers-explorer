@@ -2,7 +2,7 @@ import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
 import { GET_ArtistStatusOuputDataItem } from "@/app/_types/api";
 import { withAuth } from "@/app/_utils/auth";
-import { Artist, Image } from "@spotify/web-api-ts-sdk";
+import { Artist } from "@spotify/web-api-ts-sdk";
 
 const SPOTIFY_ALBUMS_LIMIT_MAX = 5;
 const SPOTIFY_TRACKS_LIMIT_MAX = 50;
@@ -100,11 +100,6 @@ export const GET = withAuth(
               }),
             );
 
-            const getSpotifyImageHighUrl = (images: Image[]) =>
-              images.find((image) => image.width / image.height === 1)?.url;
-            const getSpotifyImageLowUrl = (images: Image[]) =>
-              images.findLast((image) => image.width / image.height === 1)?.url;
-
             return {
               id: artistStatus.id,
               artist: {
@@ -112,7 +107,7 @@ export const GET = withAuth(
                 spotifyName: spotifyArtist.name,
                 spotifyFollowersTotal: spotifyArtist.followers.total,
                 spotifyUrl: spotifyArtist.external_urls["spotify"],
-                spotifyImageUrl: getSpotifyImageHighUrl(spotifyArtist.images),
+                // spotifyImageUrl: spotifyArtist.images[0].url, // @TODO - ...
                 spotifyTracks: spotifyAlbums.reduce(
                   (spotifyTracks, spotifyAlbum, spotifyAlbumIndex) => {
                     return [
@@ -125,7 +120,7 @@ export const GET = withAuth(
                         )
                         .map((spotifyTrack) => ({
                           spotifyUrl: spotifyTrack.preview_url!,
-                          spotifyImageUrl: getSpotifyImageLowUrl(spotifyAlbum.images), // prettier-ignore
+                          spotifyImageUrl: spotifyAlbum.images[1].url, // = 64px
                           spotifyName: spotifyTrack.name,
                           spotifyArtistNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
                           spotifyReleaseDate: spotifyAlbum.release_date,

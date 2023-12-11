@@ -23,30 +23,36 @@ Promise<GET_ArtistStatusOuput> => {
   return fetch(url, fetchOptions).then((response) => response.json());
 };
 
-export const ArtistCardsCarouselContext = React.createContext<{
+export const ArtistsStatusContext = React.createContext<{
+  isInitialLoading: boolean;
   artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
   artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
   nextArtistStatus: () => void;
 }>({
+  isInitialLoading: true,
   artistStatusCurrent: null,
   artistStatus: [],
   nextArtistStatus: () => {},
 });
 
-export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
+// @TODO - This should be renamed (as bottom ctx)?
+export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const [artistStatus, setArtistStatus] = useState<
     (GET_ArtistStatusOuputDataItem | null)[]
   >(Array(ARTIST_CARDS_CAROUSEL_OFFSET).fill(null));
 
-  const artistStatusCurrent =
+  const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
     artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
 
+  // @TODO - 2xx< (erros)?
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: nextArtistStatus = [] } = data;
     setArtistStatus((prevArtistStatus) => [
       ...prevArtistStatus, //
       ...nextArtistStatus,
     ]);
+    setIsInitialLoading(false);
   };
 
   // This makes sure cache is ignored (as status are updated)!
@@ -85,9 +91,10 @@ export const ArtistCardsCarouselProvider = (props: PropsWithChildren) => {
   };
 
   return (
-    <ArtistCardsCarouselContext.Provider
+    <ArtistsStatusContext.Provider
       {...props} //
       value={{
+        isInitialLoading,
         artistStatusCurrent,
         artistStatus,
         nextArtistStatus,

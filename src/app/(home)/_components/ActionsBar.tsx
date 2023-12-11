@@ -10,7 +10,7 @@ import {
 } from "@/app/_types/api";
 import { useContext } from "react";
 import useSWRMutation from "swr/mutation";
-import { ArtistCardsCarouselContext } from "../_contexts/ArtistCardsCarouselContext";
+import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
 
 type ActionButtonProps = {
   className?: string;
@@ -48,7 +48,7 @@ const ActionButton = (props: ActionButtonProps) => {
     <Button
       variant={variant}
       className={cn(
-        "rounded-full h-[unset] aspect-square",
+        "h-[unset] aspect-square rounded-full border",
         className,
         classNameButton,
       )}
@@ -85,7 +85,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
   const {
     artistStatusCurrent, //
     nextArtistStatus,
-  } = useContext(ArtistCardsCarouselContext);
+  } = useContext(ArtistsStatusContext);
 
   const { toast } = useToast();
   const artistStatusId = artistStatusCurrent?.id;
