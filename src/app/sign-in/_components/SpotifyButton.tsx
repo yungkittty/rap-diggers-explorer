@@ -4,15 +4,14 @@ import { Icon } from "@/app/_components/Icon";
 import { Text } from "@/app/_components/Text";
 import { Button } from "@/app/_components/ui/button";
 import { signIn } from "next-auth/react";
-import { useCallback } from "react";
 
 export const SpotifyButton = () => {
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     signIn(
       "spotify", //
       { callbackUrl: "/import" },
     );
-  }, []);
+  };
   return (
     <Button
       className="relative bg-spotify hover:bg-spotify/90"

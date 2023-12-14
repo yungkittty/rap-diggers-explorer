@@ -1,4 +1,4 @@
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { NextRequest } from "next/server";
 import { ErrorCode } from "../_constants/error-code";
 import { auth } from "../_libs/auth";

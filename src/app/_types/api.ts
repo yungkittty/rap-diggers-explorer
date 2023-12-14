@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { ErrorCode } from "../_constants/error-code";
 
 type API_Ouput = {
-  error?: string;
+  error?: ErrorCode | null;
 };
 
 //
-// API/POST - api/playlists
+// API/POST - /api/playlists
 //
 
 export const POST_PlaylistsInputSchema = z.object({
@@ -13,6 +14,12 @@ export const POST_PlaylistsInputSchema = z.object({
 });
 export type POST_PlaylistsInput = z.infer<typeof POST_PlaylistsInputSchema>;
 export type POST_PlaylistsOutput = API_Ouput & {};
+
+//
+// API/POST - /api/playlists/import
+//
+
+export type POST_PlaylistsImportOutput = API_Ouput & {};
 
 //
 // API/GET - /api/artist-status
@@ -55,3 +62,9 @@ export const PUT_ArtistStatusInputSchema = z.object({
 });
 export type PUT_ArtistStatusInput = z.infer<typeof PUT_ArtistStatusInputSchema>;
 export type PUT_ArtistStatusOutput = API_Ouput & {};
+
+//
+// API/DELETE - /api/users
+//
+
+export type DELETE_UsersOuput = {};

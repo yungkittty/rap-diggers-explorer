@@ -152,6 +152,8 @@ export const {
       return {
         user: {
           id: user.id,
+          name: session.user?.name,
+          image: session.user?.image,
         },
         expires: session.expires,
       };

@@ -35,11 +35,11 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
               <div className="h-4 w-56 bg-foreground/10 animate-pulse" />
             )}
             {!isInitialLoading ? (
-              <Text className="uppercase text-sm text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
+              <Text className="mt-[-1px] uppercase text-sm text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
                 {trackCurrent?.spotifyArtistNames.join(" • ")}
               </Text>
             ) : (
-              <div className="h-3.5 w-28 bg-foreground/10 animate-pulse" />
+              <div className="mt-[-1px] h-3.5 w-28 bg-foreground/10 animate-pulse" />
             )}
             {!isInitialLoading ? (
               <Text className="uppercase text-xs text-primary/70 leading-none whitespace-nowrap text-ellipsis overflow-hidden">

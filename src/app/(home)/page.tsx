@@ -2,7 +2,7 @@ import { withAuth } from "../_hocs/auth";
 import { ActionsBar } from "./_components/ActionsBar";
 import { ArtistCardsCarousel } from "./_components/ArtistCardsCarousel";
 import { BottomBar } from "./_components/BottomBar/BottomBar";
-import { TopBar } from "./_components/TopBar";
+import { TopBar } from "./_components/TopBar/TopBar";
 import { ArtistsStatusContextProvider } from "./_contexts/ArtistStatusContext";
 
 const HomePage = () => {

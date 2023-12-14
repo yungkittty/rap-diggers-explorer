@@ -89,6 +89,11 @@ export const GET = withAuth(
               "FR", // @TODO - ... ("FR")!
               SPOTIFY_ALBUMS_LIMIT_MAX,
             );
+            spotifyAlbums.sort((lSpotifyAlbum, rSpotifyAlbum) => {
+              if (lSpotifyAlbum.release_date > rSpotifyAlbum.release_date) return -1; // prettier-ignore
+              if (rSpotifyAlbum.release_date > lSpotifyAlbum.release_date) return 1; // prettier-ignore
+              return 0;
+            });
             const spotifyTracksPerAlbum = await Promise.all(
               spotifyAlbums.map(async (spotifyAlbum) => {
                 const { items: spotifyTracks } = await spotifyApi.albums.tracks(

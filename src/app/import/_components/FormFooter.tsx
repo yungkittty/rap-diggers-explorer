@@ -18,7 +18,7 @@ const createPlaylist = async (
   url: string, //
   { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsInput },
 ): Promise<POST_PlaylistsOutput> => {
-  const fetchOptions = {
+  const fetchOptions: RequestInit = {
     method: "POST", //
     headers: {
       Accept: "application/json",
@@ -83,16 +83,17 @@ export const FormFooter = () => {
           className="pl-[calc(50%+12px)] text-base text-primary"
           value={value}
           onChange={handleChange}
+          spellCheck={false}
         />
       </div>
       <Button
-        className="mt-3 w-full"
+        className="mt-3.5 w-full"
         size="lg"
         onClick={handleClick}
         disabled={isDisabled}
       >
         {!isMutating ? (
-          <Text className="font-bold uppercase">importer</Text>
+          <Text className="font-bold uppercase leading-none">importer</Text>
         ) : (
           <Icon className="animate-spin" name="loader-4" />
         )}

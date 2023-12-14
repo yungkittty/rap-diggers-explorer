@@ -100,7 +100,7 @@ export const BottomBarSeeker = (props: PropsWithChildren) => {
         )}
       >
         <div
-          className="absolute h-full rounded-r-full bg-foreground"
+          className="absolute h-full rounded-r-full bg-foreground/90"
           style={{
             width: `calc(${trackCurrentTimePct}% - 7.5px)`,
           }}

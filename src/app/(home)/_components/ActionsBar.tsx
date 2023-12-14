@@ -29,9 +29,7 @@ const ActionButton = (props: ActionButtonProps) => {
   } = props;
 
   let variant: ButtonProps["variant"] = "secondary";
-  if (size === "small") {
-    variant = "outline";
-  }
+  variant = "outline";
 
   const classNameButton = cn({
     "w-20": size === "large",
@@ -48,7 +46,7 @@ const ActionButton = (props: ActionButtonProps) => {
     <Button
       variant={variant}
       className={cn(
-        "h-[unset] aspect-square rounded-full border",
+        "h-[unset] aspect-square rounded-full",
         className,
         classNameButton,
       )}

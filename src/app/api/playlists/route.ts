@@ -4,15 +4,7 @@ import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { POST_PlaylistsInputSchema } from "@/app/_types/api";
 import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
-import type {
-  Page,
-  Playlist,
-  PlaylistedTrack,
-  SimplifiedTrack,
-} from "@spotify/web-api-ts-sdk";
-
-const SPOTIFY_LIMIT_MAX = 50;
-const SPOTIFY_TOTAL_MAX = 5000;
+import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
 
 export const POST = withAuth(
   async (
@@ -45,55 +37,19 @@ export const POST = withAuth(
     }
 
     const { spotifyPlaylistId } = data as POST_PlaylistsInput;
-    let spotifyPlaylist: Playlist | null = null;
+    let spotifyArtistIds: string[] = [];
     try {
-      spotifyPlaylist =
-        await spotifyApi.playlists.getPlaylist(spotifyPlaylistId);
+      spotifyArtistIds = await getSpotifyPlaylistArtistIds(
+        spotifyApi,
+        spotifyPlaylistId,
+      );
     } catch (error) {
+      console.log(error);
       return Response.json(
         { error: ErrorCode.SPOTIFY_UNKNOWN }, //
         { status: 500 },
       );
     }
-
-    if (spotifyPlaylist.tracks.total > SPOTIFY_TOTAL_MAX) {
-      return Response.json(
-        { error: ErrorCode.USER_FORBIDDEN_MAX_TRACKS },
-        { status: 403 },
-      );
-    }
-
-    let next = spotifyPlaylist.tracks.next;
-    let offset = spotifyPlaylist.tracks.limit;
-    const items = spotifyPlaylist.tracks.items;
-    for (; next !== null; offset += SPOTIFY_LIMIT_MAX) {
-      let spotifyTracks: Page<PlaylistedTrack> | null = null;
-      try {
-        spotifyTracks = await spotifyApi.playlists.getPlaylistItems(
-          spotifyPlaylistId,
-          undefined,
-          undefined,
-          SPOTIFY_LIMIT_MAX,
-          offset,
-        );
-      } catch (error) {
-        console.log(error);
-        return Response.json(
-          { error: ErrorCode.SPOTIFY_UNKNOWN }, //
-          { status: 500 },
-        );
-      }
-      items.push(...spotifyTracks.items);
-      next = spotifyTracks.next;
-    }
-
-    const spotifyArtistIdsSet = new Set<string>([]);
-    items.forEach((item) =>
-      (item.track as SimplifiedTrack).artists.forEach(
-        (artist) => spotifyArtistIdsSet.add(artist.id), //
-      ),
-    );
-    const spotifyArtistIds = Array.from(spotifyArtistIdsSet);
 
     await prisma.$transaction(async (tx) => {
       const { id: playlistId } = await tx.playlist.upsert({

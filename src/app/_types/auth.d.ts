@@ -5,6 +5,8 @@ declare module "next-auth" {
     error?: string;
     user?: {
       id: string;
+      name?: string | null;
+      image?: string | null;
     };
     expires?: ISODateString;
   }
