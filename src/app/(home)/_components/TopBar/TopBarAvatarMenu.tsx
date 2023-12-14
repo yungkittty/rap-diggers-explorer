@@ -59,11 +59,9 @@ export const TopBarAvatarMenu = () => {
   const handleDelete = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     try {
-      const data = await trigger();
-      if (!data.error) {
-        router.replace("/sign-in");
-        return;
-      }
+      await trigger();
+      router.replace("/sign-in");
+      return;
     } catch (error) {
       if (process.env.VERCEL_ENV !== "production") {
         console.log(error);
