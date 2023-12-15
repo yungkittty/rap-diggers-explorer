@@ -81,6 +81,7 @@ const updateArtistStatus = async (
 type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
   const {
+    isInitialLoading,
     artistStatusCurrent, //
     nextArtistStatus,
   } = useContext(ArtistsStatusContext);
@@ -93,7 +94,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
   );
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (!artistStatusId || isMutating) {
+      if (isInitialLoading || !artistStatusId || isMutating) {
         return;
       }
       try {
@@ -116,7 +117,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
     };
 
   return (
-    <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center py-12">
+    <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center pb-12">
       <ActionButton
         iconName="check" //
         size="small"

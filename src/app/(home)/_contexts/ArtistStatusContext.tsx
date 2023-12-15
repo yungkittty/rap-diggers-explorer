@@ -35,11 +35,10 @@ export const ArtistsStatusContext = React.createContext<{
   nextArtistStatus: () => {},
 });
 
-// @TODO - This should be renamed (as bottom ctx)?
 export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const [artistStatus, setArtistStatus] = useState<
     (GET_ArtistStatusOuputDataItem | null)[]
-  >(Array(ARTIST_CARDS_CAROUSEL_OFFSET).fill(null));
+  >(Array(ARTIST_CARDS_CAROUSEL_SIZE).fill(null));
 
   const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
     artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
@@ -49,7 +48,7 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: nextArtistStatus = [] } = data;
     setArtistStatus((prevArtistStatus) => [
-      ...prevArtistStatus, //
+      ...(isInitialLoading ? prevArtistStatus.slice(0, ARTIST_CARDS_CAROUSEL_OFFSET) : prevArtistStatus), // prettier-ignore
       ...nextArtistStatus,
     ]);
     setIsInitialLoading(false);

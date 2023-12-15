@@ -12,6 +12,7 @@ export const Image = (props: ImageProps) => {
         "select-none", //
         className,
       )}
+      draggable={false}
       {...others}
     />
   );

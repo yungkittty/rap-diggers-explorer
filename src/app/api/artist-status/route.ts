@@ -112,7 +112,7 @@ export const GET = withAuth(
                 spotifyName: spotifyArtist.name,
                 spotifyFollowersTotal: spotifyArtist.followers.total,
                 spotifyUrl: spotifyArtist.external_urls["spotify"],
-                // spotifyImageUrl: spotifyArtist.images[0].url, // @TODO - ...
+                spotifyImageUrl: spotifyArtist.images[0].url,
                 spotifyTracks: spotifyAlbums.reduce(
                   (spotifyTracks, spotifyAlbum, spotifyAlbumIndex) => {
                     return [
