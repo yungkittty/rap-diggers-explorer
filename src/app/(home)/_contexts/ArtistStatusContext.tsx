@@ -43,7 +43,6 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
     artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
 
-  // @TODO - 2xx< (erros)?
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: nextArtistStatus = [] } = data;

@@ -10,10 +10,10 @@ export const ARTIST_CARDS_CAROUSEL_OFFSET = 3;
 
 type ArtistCardsCarouselProps = {};
 export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
-  const { artistStatus } = useContext(ArtistsStatusContext);
+  const { isInitialLoading, artistStatus } = useContext(ArtistsStatusContext);
 
   return (
-    <div className="flex flex-row flex-1 pt-12 overflow-hidden">
+    <div className="flex flex-row flex-1 pt-12 pb-12 overflow-hidden">
       <div
         className="relative flex flex-row flex-1"
         style={{
@@ -28,15 +28,22 @@ export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
             artistStatus, //
             artistStatusIndex,
           ) => {
-            if (
-              !artistStatus ||
-              artistStatusIndex >= ARTIST_CARDS_CAROUSEL_SIZE
-            ) {
+            // prettier-ignore
+            if (isInitialLoading && artistStatusIndex < ARTIST_CARDS_CAROUSEL_OFFSET) {
+              return null;
+            }
+            if (!isInitialLoading && !artistStatus) {
+              return null;
+            }
+            if (artistStatusIndex >= ARTIST_CARDS_CAROUSEL_SIZE) {
               return null;
             }
 
+            const isFocused =
+              artistStatusIndex === ARTIST_CARDS_CAROUSEL_OFFSET;
+
             const className = cn(
-              "box-border absolute transition-all duration-1000",
+              "box-border absolute transition-all duration-700",
               {
                 "scale-75": artistStatusIndex !== ARTIST_CARDS_CAROUSEL_OFFSET,
                 "origin-left": artistStatusIndex < ARTIST_CARDS_CAROUSEL_OFFSET,
@@ -44,7 +51,7 @@ export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
                 "left-[calc(50%-40cqh-((80cqh*0.75)+48px)*3)]": artistStatusIndex === 0, // prettier-ignore
                 "left-[calc(50%-40cqh-((80cqh*0.75)+48px)*2)]": artistStatusIndex === 1, // prettier-ignore
                 "left-[calc(50%-40cqh-((80cqh*0.75)+48px)*1)]": artistStatusIndex === 2, // prettier-ignore
-                "left-[calc(50%-40cqh)]": artistStatusIndex === ARTIST_CARDS_CAROUSEL_OFFSET, // prettier-ignore
+                "left-[calc(50%-40cqh)]": isFocused, // prettier-ignore
                 "left-[calc(50%-40cqh+((80cqh*0.75)+48px)*1)]": artistStatusIndex === 4, // prettier-ignore
                 "left-[calc(50%-40cqh+((80cqh*0.75)+48px)*2)]": artistStatusIndex === 5, // prettier-ignore
                 "left-[calc(50%-40cqh+((80cqh*0.75)+48px)*3)]": artistStatusIndex === 6, // prettier-ignore
@@ -53,8 +60,10 @@ export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
             return (
               <ArtistCard
                 className={className}
-                key={`artist-card-${artistStatus.id}`}
-                artist={artistStatus.artist}
+                key={`artist-card-${artistStatus?.id || artistStatusIndex}`}
+                artist={artistStatus?.artist}
+                isLoading={!artistStatus}
+                isFocused={isFocused}
               />
             );
           },
