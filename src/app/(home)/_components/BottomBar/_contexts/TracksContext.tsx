@@ -1,7 +1,10 @@
 "use client";
 
 import { ArtistsStatusContext } from "@/app/(home)/_contexts/ArtistStatusContext";
-import { GET_ArtistStatusOuputDataItemTrack } from "@/app/_types/api";
+import {
+  GET_ArtistStatusTracksOutput,
+  GET_ArtistStatusTracksOutputDataItem,
+} from "@/app/_types/api";
 import React, {
   ChangeEvent,
   Dispatch,
@@ -12,6 +15,21 @@ import React, {
   useRef,
   useState,
 } from "react";
+import useSWRImmutable from "swr/immutable";
+
+const getArtistStatusTracks = async (
+  url: string,
+): //
+Promise<GET_ArtistStatusTracksOutput> => {
+  const fetchOptions = {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  };
+  return fetch(url, fetchOptions).then((response) => response.json());
+};
 
 type TrackCurrentMetadata = {
   duration: number;
@@ -22,10 +40,10 @@ export const TracksContext = React.createContext<{
   isPlaying: boolean;
   isSeeking: boolean;
   setIsSeeking: Dispatch<SetStateAction<boolean>>;
-  tracks: (GET_ArtistStatusOuputDataItemTrack | null)[];
-  trackCurrent: GET_ArtistStatusOuputDataItemTrack | null;
+  tracks: GET_ArtistStatusTracksOutputDataItem[];
+  trackCurrent: GET_ArtistStatusTracksOutputDataItem | null;
   trackCurrentMetadata: TrackCurrentMetadata | null;
-  prevTrack: () => void;
+  previousTrack: () => void;
   nextTrack: () => void;
   toggleTrack: () => void;
   seekTrackToPercentage: (percentage: number) => void;
@@ -37,7 +55,7 @@ export const TracksContext = React.createContext<{
   tracks: [],
   trackCurrent: null,
   trackCurrentMetadata: null,
-  prevTrack: () => {},
+  previousTrack: () => {},
   nextTrack: () => {},
   toggleTrack: () => {},
   seekTrackToPercentage: () => {},
@@ -48,18 +66,34 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const { artistStatusCurrent } = useContext(ArtistsStatusContext);
+  const { artistStatusCurrent, artistStatusNext } =
+    useContext(ArtistsStatusContext);
 
-  const tracks: GET_ArtistStatusOuputDataItemTrack[] =
-    artistStatusCurrent?.artist.spotifyTracks || [];
+  // @TODO - This should handle errors! (only spotify?)
+  let artistStatusId = artistStatusCurrent?.id || null;
+  const { data, isLoading: isLoading_ } = useSWRImmutable(
+    artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
+    getArtistStatusTracks,
+    // { onError: () => {} },
+  );
+  // This allows to pre-fetch next track(s)!
+  artistStatusId = artistStatusNext?.id || null;
+  useSWRImmutable(
+    artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
+    getArtistStatusTracks,
+    // { onError: () => {} },
+  );
 
   const [trackIndex, setTrackIndex] = useState(0);
-  const trackCurrent: GET_ArtistStatusOuputDataItemTrack | null =
-    tracks[trackIndex] || null;
+  const tracks: GET_ArtistStatusTracksOutputDataItem[] = data?.data || []; // prettier-ignore
+  const trackCurrent: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex] || null; // prettier-ignore
 
   const [isPlaying, setIsPlaying] = useState(false);
   const toggleTrack = () => {
     if (!audioRef.current) {
+      return;
+    }
+    if (!trackCurrent) {
       return;
     }
     if (!isPlaying) {
@@ -139,12 +173,15 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
       setTrackCurrentMetadata(null);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [artistStatusCurrent?.id],
+    [artistStatusId],
   );
 
-  const prevTrack = async () => {
-    setTrackIndex((prevTrackIndex) => {
-      const nextTrackIndex = prevTrackIndex - 1;
+  const previousTrack = async () => {
+    if (!trackCurrent) {
+      return;
+    }
+    setTrackIndex((previousTrackIndex) => {
+      const nextTrackIndex = previousTrackIndex - 1;
       if (nextTrackIndex < 0) {
         return Math.max(0, tracks.length - 1);
       }
@@ -152,8 +189,11 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
     });
   };
   const nextTrack = async () => {
-    setTrackIndex((prevTrackIndex) => {
-      const nextTrackIndex = prevTrackIndex + 1;
+    if (!trackCurrent) {
+      return;
+    }
+    setTrackIndex((previousTrackIndex) => {
+      const nextTrackIndex = previousTrackIndex + 1;
       if (nextTrackIndex >= tracks.length) {
         return 0;
       }
@@ -170,14 +210,14 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
   return (
     <TracksContext.Provider
       value={{
-        isLoading,
+        isLoading: isLoading_ || isLoading,
         isPlaying,
         isSeeking,
         setIsSeeking,
         tracks,
         trackCurrent,
         trackCurrentMetadata,
-        prevTrack,
+        previousTrack,
         nextTrack,
         toggleTrack,
         seekTrackToPercentage,

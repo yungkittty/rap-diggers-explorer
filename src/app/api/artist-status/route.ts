@@ -4,12 +4,10 @@ import { GET_ArtistStatusOuputDataItem } from "@/app/_types/api";
 import { withAuth } from "@/app/_utils/auth";
 import { Artist } from "@spotify/web-api-ts-sdk";
 
-const SPOTIFY_ALBUMS_LIMIT_MAX = 5;
-const SPOTIFY_TRACKS_LIMIT_MAX = 50;
-
 const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
 const GET_ARTIST_STATUS_DEFAULT_LIMIT = 10;
 
+// @TODO - This should be removed?
 // This makes sure returned data isn't cached!
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#options
 export const dynamic = "force-dynamic";
@@ -73,79 +71,21 @@ export const GET = withAuth(
       );
     }
 
-    let artistStatus_: GET_ArtistStatusOuputDataItem[] = [];
-    try {
-      artistStatus_ = await Promise.all(
-        artistStatus.map(
-          async (
-            artistStatus, //
-            artistStatusIndex,
-          ) => {
-            const spotifyArtist = spotifyArtists[artistStatusIndex];
-
-            const { items: spotifyAlbums } = await spotifyApi.artists.albums(
-              spotifyArtist.id,
-              "single,album",
-              "FR", // @TODO - ... ("FR")!
-              SPOTIFY_ALBUMS_LIMIT_MAX,
-            );
-            spotifyAlbums.sort((lSpotifyAlbum, rSpotifyAlbum) => {
-              if (lSpotifyAlbum.release_date > rSpotifyAlbum.release_date) return -1; // prettier-ignore
-              if (rSpotifyAlbum.release_date > lSpotifyAlbum.release_date) return 1; // prettier-ignore
-              return 0;
-            });
-            const spotifyTracksPerAlbum = await Promise.all(
-              spotifyAlbums.map(async (spotifyAlbum) => {
-                const { items: spotifyTracks } = await spotifyApi.albums.tracks(
-                  spotifyAlbum.id,
-                  "FR", // @TODO - ... ("FR")!
-                  SPOTIFY_TRACKS_LIMIT_MAX,
-                );
-                return spotifyTracks;
-              }),
-            );
-
-            return {
-              id: artistStatus.id,
-              artist: {
-                spotifyId: spotifyArtist.id,
-                spotifyName: spotifyArtist.name,
-                spotifyFollowersTotal: spotifyArtist.followers.total,
-                spotifyUrl: spotifyArtist.external_urls["spotify"],
-                spotifyImageUrl: spotifyArtist.images[0].url,
-                spotifyTracks: spotifyAlbums.reduce(
-                  (spotifyTracks, spotifyAlbum, spotifyAlbumIndex) => {
-                    return [
-                      ...spotifyTracks,
-                      ...spotifyTracksPerAlbum[spotifyAlbumIndex]
-                        .filter(
-                          (spotifyTrack) =>
-                            spotifyTrack.is_playable &&
-                            spotifyTrack.preview_url != null,
-                        )
-                        .map((spotifyTrack) => ({
-                          spotifyUrl: spotifyTrack.preview_url!,
-                          spotifyImageUrl: spotifyAlbum.images[1].url, // = 64px
-                          spotifyName: spotifyTrack.name,
-                          spotifyArtistNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
-                          spotifyReleaseDate: spotifyAlbum.release_date,
-                        })),
-                    ];
-                  },
-                  [] as GET_ArtistStatusOuputDataItem["artist"]["spotifyTracks"],
-                ),
-              },
-            };
+    const artistStatus_: GET_ArtistStatusOuputDataItem[] = artistStatus.map(
+      (artistStatus, artistStatusIndex) => {
+        const spotifyArtist = spotifyArtists[artistStatusIndex];
+        return {
+          id: artistStatus.id,
+          artist: {
+            spotifyId: spotifyArtist.id,
+            spotifyName: spotifyArtist.name,
+            spotifyFollowersTotal: spotifyArtist.followers.total,
+            spotifyUrl: spotifyArtist.external_urls["spotify"],
+            spotifyImageUrl: spotifyArtist.images[0]?.url,
           },
-        ),
-      );
-    } catch (error) {
-      console.log(error);
-      return Response.json(
-        { error: ErrorCode.SPOTIFY_UNKNOWN }, //
-        { status: 500 },
-      );
-    }
+        };
+      },
+    );
 
     return Response.json(
       { data: artistStatus_ }, //

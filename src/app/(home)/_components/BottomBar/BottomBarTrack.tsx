@@ -8,13 +8,13 @@ import { TracksContext } from "./_contexts/TracksContext";
 
 type BottomBarTrackProps = {};
 export const BottomBarTrack = (props: BottomBarTrackProps) => {
-  const { isInitialLoading } = useContext(ArtistsStatusContext);
+  const { isInitialLoading, artistStatusCurrent } = useContext(ArtistsStatusContext); // prettier-ignore
 
   const { trackCurrent } = useContext(TracksContext);
 
   return (
     <div className="flex flex-row flex-1">
-      {isInitialLoading || trackCurrent ? (
+      {isInitialLoading || artistStatusCurrent ? (
         <>
           <div className="flex shrink-0 relative h-full aspect-square rounded-md overflow-hidden">
             <div className="flex flex-1 bg-foreground/10 animate-pulse" />
@@ -27,28 +27,26 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
             ) : null}
           </div>
           <div className="flex flex-col justify-around ml-3 min-w-0">
-            {!isInitialLoading ? (
+            {trackCurrent ? (
               <Text className="uppercase text-base text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
-                {trackCurrent?.spotifyName}
+                {trackCurrent.spotifyName}
               </Text>
             ) : (
               <div className="h-4 w-56 bg-foreground/10 animate-pulse" />
             )}
-            {!isInitialLoading ? (
+            {trackCurrent ? (
               <Text className="mt-[-1px] uppercase text-sm text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
-                {trackCurrent?.spotifyArtistNames.join(" • ")}
+                {trackCurrent.spotifyArtistNames.join(" • ")}
               </Text>
             ) : (
               <div className="mt-[-1px] h-3.5 w-28 bg-foreground/10 animate-pulse" />
             )}
-            {!isInitialLoading ? (
+            {trackCurrent ? (
               <Text className="uppercase text-xs text-primary/70 leading-none whitespace-nowrap text-ellipsis overflow-hidden">
-                {trackCurrent?.spotifyReleaseDate
-                  ? new Intl.DateTimeFormat(
-                      "fr-FR", //
-                      { month: "short", year: "numeric" },
-                    ).format(new Date(trackCurrent.spotifyReleaseDate))
-                  : null}
+                {new Intl.DateTimeFormat(
+                  "fr-FR", //
+                  { month: "short", year: "numeric" },
+                ).format(new Date(trackCurrent.spotifyReleaseDate))}
               </Text>
             ) : (
               <div className="h-3 w-14 bg-foreground/10 animate-pulse" />

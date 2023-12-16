@@ -25,13 +25,6 @@ export type POST_PlaylistsImportOutput = API_Ouput & {};
 // API/GET - /api/artist-status
 //
 
-export type GET_ArtistStatusOuputDataItemTrack = {
-  spotifyUrl: string;
-  spotifyImageUrl?: string;
-  spotifyName: string;
-  spotifyArtistNames: string[];
-  spotifyReleaseDate: string;
-};
 export type GET_ArtistStatusOuputDataItem = {
   id: string;
   artist: {
@@ -40,7 +33,6 @@ export type GET_ArtistStatusOuputDataItem = {
     spotifyFollowersTotal: number;
     spotifyUrl: string;
     spotifyImageUrl?: string;
-    spotifyTracks: GET_ArtistStatusOuputDataItemTrack[];
   };
 };
 export type GET_ArtistStatusOuput = API_Ouput & {
@@ -48,7 +40,7 @@ export type GET_ArtistStatusOuput = API_Ouput & {
 };
 
 //
-// API/PUT - /api/artist-status
+// API/PUT - /api/artist-status/[artist-status-id]
 //
 
 export const PUT_ArtistStatusInputSchema = z.object({
@@ -62,6 +54,21 @@ export const PUT_ArtistStatusInputSchema = z.object({
 });
 export type PUT_ArtistStatusInput = z.infer<typeof PUT_ArtistStatusInputSchema>;
 export type PUT_ArtistStatusOutput = API_Ouput & {};
+
+//
+// API/GET - /api/artist-status/[artist-status-id]/tracks
+//
+
+export type GET_ArtistStatusTracksOutputDataItem = {
+  spotifyUrl: string;
+  spotifyImageUrl?: string;
+  spotifyName: string;
+  spotifyArtistNames: string[];
+  spotifyReleaseDate: string;
+};
+export type GET_ArtistStatusTracksOutput = API_Ouput & {
+  data?: GET_ArtistStatusTracksOutputDataItem[];
+};
 
 //
 // API/DELETE - /api/users

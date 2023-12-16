@@ -26,11 +26,13 @@ Promise<GET_ArtistStatusOuput> => {
 export const ArtistsStatusContext = React.createContext<{
   isInitialLoading: boolean;
   artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
+  artistStatusNext: GET_ArtistStatusOuputDataItem | null;
   artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
   nextArtistStatus: () => void;
 }>({
   isInitialLoading: true,
   artistStatusCurrent: null,
+  artistStatusNext: null,
   artistStatus: [],
   nextArtistStatus: () => {},
 });
@@ -42,19 +44,22 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
 
   const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
     artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
+  const artistStatusNext: GET_ArtistStatusOuputDataItem | null =
+    artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET + 1] || null;
 
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
     const { data: nextArtistStatus = [] } = data;
-    setArtistStatus((prevArtistStatus) => [
-      ...(isInitialLoading ? prevArtistStatus.slice(0, ARTIST_CARDS_CAROUSEL_OFFSET) : prevArtistStatus), // prettier-ignore
+    setArtistStatus((previousArtistStatus) => [
+      ...(isInitialLoading
+        ? previousArtistStatus.slice(0, ARTIST_CARDS_CAROUSEL_OFFSET)
+        : previousArtistStatus),
       ...nextArtistStatus,
     ]);
     setIsInitialLoading(false);
   };
 
-  // This makes sure cache is ignored (as status are updated)!
-  // https://github.com/vercel/swr/discussions/456#discussioncomment-25602
+  // @TODO - This should handle errors! (only spotify?)
   const [
     [offset, offsetId], //
     setOffset,
@@ -68,12 +73,12 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   useSWRImmutable(
     [url, offsetId], //
     getArtistStatus,
-    { onSuccess: handleSuccess },
+    { onSuccess: handleSuccess /*, onError: () => {} */ },
   );
 
   const nextArtistStatus = () => {
-    setArtistStatus((prevArtistStatus) => {
-      const [, ...nextArtistStatus] = prevArtistStatus;
+    setArtistStatus((previousArtistStatus) => {
+      const [, ...nextArtistStatus] = previousArtistStatus;
       if (
         nextArtistStatus.length <=
         ARTIST_CARDS_CAROUSEL_SIZE + ARTIST_CARDS_CAROUSEL_OFFSET
@@ -94,6 +99,7 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
       value={{
         isInitialLoading,
         artistStatusCurrent,
+        artistStatusNext,
         artistStatus,
         nextArtistStatus,
       }}

@@ -81,24 +81,22 @@ const updateArtistStatus = async (
 type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
   const {
-    isInitialLoading,
     artistStatusCurrent, //
     nextArtistStatus,
   } = useContext(ArtistsStatusContext);
 
   const { toast } = useToast();
-  const artistStatusId = artistStatusCurrent?.id;
+  const artistStatusId = artistStatusCurrent?.id || null;
   const { trigger, isMutating } = useSWRMutation(
-    `/api/artist-status/${artistStatusId}`, //
+    artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
     updateArtistStatus,
   );
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (isInitialLoading || !artistStatusId || isMutating) {
+      if (!artistStatusId || isMutating) {
         return;
       }
       try {
-        // @TODO - ... (null)!
         const data = await trigger({ action });
         if (!data.error) {
           nextArtistStatus();
