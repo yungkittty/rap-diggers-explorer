@@ -55,7 +55,7 @@ export const PUT = withAuth(
     });
     if (!artistStatus) {
       return Response.json(
-        { error: null }, // @TODO - ...
+        { error: ErrorCode.ARTIST_STATUS_NOT_FOUND },
         { status: 404 },
       );
     }
@@ -92,13 +92,11 @@ export const PUT = withAuth(
     }
 
     await prisma.$transaction(async (tx) => {
-      if (spotifyArtistIds.length > 0) {
-        await upsertArtistStatus(
-          tx, //
-          userId,
-          spotifyArtistIds,
-        );
-      }
+      await upsertArtistStatus(
+        tx, //
+        userId,
+        spotifyArtistIds,
+      );
 
       await tx.artistStatus.update({
         data: {

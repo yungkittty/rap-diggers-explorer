@@ -1,9 +1,27 @@
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { ErrorCode } from "../_constants/error-code";
 import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
 import { getSpotifyApi } from "../_libs/spotify";
+
+export const signOutServerSide = async (): Promise<void> => {
+  const sessionCookie = cookies().get("next-auth.session-token");
+  if (!sessionCookie) {
+    return;
+  }
+  const sessionToken = sessionCookie.value;
+  try {
+    await prisma.session.update({
+      data: { expires: new Date() },
+      where: { sessionToken: sessionToken },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  return;
+};
 
 export const withAuth =
   (
@@ -23,9 +41,12 @@ export const withAuth =
     const session = await auth();
     if (
       !session || //
-      !session.user // ||
-      // session.error // @TODO - This should be changed!
+      !session.user ||
+      session.error !== undefined
     ) {
+      if (session && session.error !== undefined) {
+        await signOutServerSide();
+      }
       return Response.json(
         { error: ErrorCode.USER_UNAUTHORIZED },
         { status: 401 },

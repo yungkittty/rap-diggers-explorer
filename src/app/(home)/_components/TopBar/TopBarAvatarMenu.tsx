@@ -28,7 +28,6 @@ import {
 import { useToast } from "@/app/_components/ui/use-toast";
 import { DELETE_UsersOuput } from "@/app/_types/api";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
 import useSWRMutation from "swr/mutation";
 
@@ -46,11 +45,12 @@ const deleteUser = async (url: string): Promise<DELETE_UsersOuput> => {
 export const TopBarAvatarMenu = () => {
   const { data } = useSession();
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/sign-in" });
+  const handleSignOut = async () => {
+    await signOut(
+      { callbackUrl: "/sign-in" }, //
+    );
   };
 
-  const router = useRouter();
   const { toast } = useToast();
   const { trigger, isMutating } = useSWRMutation(
     "/api/users", //
@@ -60,7 +60,7 @@ export const TopBarAvatarMenu = () => {
     event.preventDefault();
     try {
       await trigger();
-      router.replace("/sign-in");
+      await handleSignOut();
       return;
     } catch (error) {
       if (process.env.VERCEL_ENV !== "production") {

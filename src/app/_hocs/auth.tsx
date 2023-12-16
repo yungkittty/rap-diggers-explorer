@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
+import { signOutServerSide } from "../_utils/auth";
 
 export const withAuth = (Component: React.ComponentType<any>) => {
   const displayName = Component.displayName || "Component";
@@ -13,9 +14,12 @@ export const withAuth = (Component: React.ComponentType<any>) => {
     const session = await auth();
     if (
       !session || //
-      !session.user // ||
-      // session.error // @TODO - This should be changed!
+      !session.user ||
+      session.error !== undefined
     ) {
+      if (session && session.error !== undefined) {
+        await signOutServerSide();
+      }
       if (pathname === "/sign-in") {
         return <Component />;
       }

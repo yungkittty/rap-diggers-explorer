@@ -70,9 +70,6 @@ export const {
       return true;
     },
     async session(params) {
-      // @TODO - This should be handled!
-      // return { error: "" };
-
       const { user } = params;
 
       const userId = user.id;
@@ -83,7 +80,7 @@ export const {
         },
       });
       if (accounts.length !== 1) {
-        return { error: "" }; // @TODO - This should be defined!
+        return { error: "" };
       }
       const account = accounts[0];
       const accountId = account.id;
@@ -119,12 +116,12 @@ export const {
             fetchOptions,
           );
           if (response.status !== 200) {
-            return { error: "" }; // @TODO - This should be defined!
+            return { error: "" };
           }
           data = await response.json();
         } catch {}
         if (!data) {
-          return { error: "" }; // @TODO - This should be defined!
+          return { error: "" };
         }
 
         const {

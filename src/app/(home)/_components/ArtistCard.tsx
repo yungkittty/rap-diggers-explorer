@@ -61,7 +61,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
       <div className="absolute w-full h-full bg-gradient-to-t from-white" />
       {!isLoading ? (
         <div className="absolute flex flex-col items-center h-full w-full pt-[calc(100%/2/2/2)] pb-[calc(100%/2/2/2/2)] px-[calc(100%/2/2/2/2/2)]">
-          <div className="flex relative w-1/2 aspect-square rounded-lg shadow overflow-hidden">
+          <div className="flex relative w-1/2 aspect-square rounded-lg shadow-md overflow-hidden">
             {artist?.spotifyImageUrl ? (
               <Image
                 src={artist?.spotifyImageUrl}
@@ -75,8 +75,8 @@ export const ArtistCard = (props: ArtistCardProps) => {
           <Heading className="mt-[calc(100%/2/2/2/2)] text-2xl text-primary">
             {artist?.spotifyName}
           </Heading>
-          <div className="flex flex-col justify-center items-center mt-[calc(100%/2/2/2/1.5)]">
-            <Text className="text-xl text-primary font-bold">
+          <div className="flex flex-col justify-center items-center mt-[calc(100%/2/2/2/2)]">
+            <Text className="text-2xl text-primary font-bold">
               {artist?.spotifyFollowersTotal
                 ? Intl.NumberFormat(
                     "fr-FR", //
@@ -84,7 +84,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
                   ).format(artist?.spotifyFollowersTotal)
                 : null}
             </Text>
-            <Text className="mt-1.5 text-xs text-primary/80 uppercase">
+            <Text className="mt-1 text-sm text-primary/70 uppercase">
               abonné·e·s
             </Text>
           </div>
@@ -98,8 +98,8 @@ export const ArtistCard = (props: ArtistCardProps) => {
       ) : null}
       <div
         className={cn(
-          "absolute h-[125%] w-[125%] mt-[-25%] ml-[-25%] backdrop-blur transition-all duration-700 overflow-hidden", //
-          { "backdrop-blur-none pointer-events-none": isFocused },
+          "absolute h-[125%] w-[125%] mt-[-25%] ml-[-25%] bg-background/50 backdrop-blur-xl transition-all duration-700 overflow-hidden", //
+          { "bg-transparent backdrop-blur-none pointer-events-none": isFocused }, // prettier-ignore
         )}
       />
     </Card>

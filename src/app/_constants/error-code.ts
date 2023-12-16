@@ -8,6 +8,9 @@ export enum ErrorCode {
   // Input(s)
   INPUT_INVALID = "INPUT_INVALID",
 
+  // ArtistStatu(s)
+  ARTIST_STATUS_NOT_FOUND = "ARTIST_STATUS_NOT_FOUND",
+
   // Misc(s)
   SPOTIFY_UNKNOWN = "SPOTIFY_UNKNOWN",
 }

@@ -56,24 +56,31 @@ export const TopBarManualButton = () => {
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-1.5">
+          {/* prettier-ignore */}
           <ManualLine iconName="check">
             Je <span className="italic mr-0.5">creuse</span> l’artiste.
           </ManualLine>
+          {/* prettier-ignore */}
           <ManualLine iconName="heart">
             Je <span className="italic mr-0.5">creuse</span> l’artiste et le sauvegarde pour l’export.
           </ManualLine>
+          {/* prettier-ignore */}
           <ManualLine iconName="time">
             Je passe l’artiste pour une durée de 6 mois.
           </ManualLine>
+          {/* prettier-ignore */}
           <ManualLine iconName="dislike"><ManualLine iconName="close">
             Je passe l’artiste pour une durée de 1 an.
           </ManualLine></ManualLine>
+          {/* prettier-ignore */}
           <ManualLine iconName="loop-left">
             J’importe les nouveaux artistes de ma playlist.
           </ManualLine>
+          {/* prettier-ignore */}
           <ManualLine iconName="download">
             J’exporte les artistes sauvegardés depuis le dernier export.
           </ManualLine>
+          {/* prettier-ignore */}
           <Text className="mt-2 text-sm text-primary/50">
             <span className="italic">creuser</span><span className="ml-1.5 mr-2">:</span>chercher les artistes similaires
           </Text>

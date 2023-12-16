@@ -13,7 +13,6 @@ import React, {
   useState,
 } from "react";
 
-// @TODO - This (ctx) should be renamed!
 type TrackCurrentMetadata = {
   duration: number;
   currentTime: number;
