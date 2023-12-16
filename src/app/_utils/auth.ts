@@ -21,7 +21,6 @@ export const signOutServerSide = async (): Promise<void> => {
   } catch (error) {
     console.log(error);
   }
-  cookies().delete(NEXT_AUTH_SESSION_COOKIE_NAME);
   return;
 };
 

@@ -6,6 +6,7 @@ import { Artist } from "@spotify/web-api-ts-sdk";
 
 const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
 const GET_ARTIST_STATUS_DEFAULT_LIMIT = 10;
+const GET_ARTIST_STATUS_MAX_LIMIT = 50;
 
 // @TODO - This should be removed?
 // This makes sure returned data isn't cached!
@@ -19,9 +20,16 @@ export const GET = withAuth(
     spotifyApi,
   ) => {
     const searchParams = request.nextUrl.searchParams;
+    // const filters = "all";
     const offset = Number(searchParams.get("offset")) || GET_ARTIST_STATUS_DEFAULT_OFFSET; // prettier-ignore
     const limit = Number(searchParams.get("limit")) || GET_ARTIST_STATUS_DEFAULT_LIMIT; // prettier-ignore
-    // const filters = "all";
+    // https://developer.spotify.com/documentation/web-api/reference/get-multiple-artists
+    if (limit > GET_ARTIST_STATUS_MAX_LIMIT) {
+      return Response.json(
+        { error: ErrorCode.INPUT_INVALID }, //
+        { status: 400 },
+      );
+    }
 
     const artistStatus = await prisma.artistStatus.findMany({
       select: {

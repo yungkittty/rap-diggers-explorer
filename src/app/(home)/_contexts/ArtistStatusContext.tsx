@@ -37,6 +37,8 @@ export const ArtistsStatusContext = React.createContext<{
   nextArtistStatus: () => {},
 });
 
+const ARTIST_CARDS_CAROUSEL_FETCH_SIZE = 50; // = spotify max
+
 export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const [artistStatus, setArtistStatus] = useState<
     (GET_ArtistStatusOuputDataItem | null)[]
@@ -68,7 +70,7 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     "/api/artist-status?" +
     new URLSearchParams({
       offset: String(offset),
-      limit: String(ARTIST_CARDS_CAROUSEL_SIZE),
+      limit: String(ARTIST_CARDS_CAROUSEL_FETCH_SIZE),
     }).toString();
   useSWRImmutable(
     [url, offsetId], //
@@ -76,6 +78,8 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     { onSuccess: handleSuccess /*, onError: () => {} */ },
   );
 
+  // @TODO - This could prevent unnecessary fetch ...
+  // ... by setting state upon action type (!= like & size < X => avoid fetch)
   const nextArtistStatus = () => {
     setArtistStatus((previousArtistStatus) => {
       const [, ...nextArtistStatus] = previousArtistStatus;

@@ -19,8 +19,7 @@ import useSWRImmutable from "swr/immutable";
 
 const getArtistStatusTracks = async (
   url: string,
-): //
-Promise<GET_ArtistStatusTracksOutput> => {
+): Promise<GET_ArtistStatusTracksOutput> => {
   const fetchOptions = {
     method: "GET",
     headers: {
