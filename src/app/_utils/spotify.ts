@@ -9,6 +9,7 @@ import { ErrorCode } from "../_constants/error-code";
 
 const SPOTIFY_GET_PLAYLIST_ARTISTS_MAX_TRACKS = 2500;
 const SPOTIFY_GET_PLAYLIST_ARTISTS_LIMIT_TRACKS = 50;
+
 export const getSpotifyPlaylistArtistIds = async (
   spotifyApi: SpotifyApi,
   spotifyPlaylistId: string,

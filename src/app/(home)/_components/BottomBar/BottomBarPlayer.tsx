@@ -9,13 +9,13 @@ type BottomBarPlayerProps = {};
 export const BottomBarPlayer = (props: BottomBarPlayerProps) => {
   const {
     isPlaying, //
-    prevTrack,
+    previousTrack,
     toggleTrack,
     nextTrack,
   } = useContext(TracksContext);
   return (
     <div className="flex flex-row items-center justify-center space-x-6">
-      <Button variant="ghost" size="icon" onClick={prevTrack}>
+      <Button variant="ghost" size="icon" onClick={previousTrack}>
         <Icon name="skip-back" />
       </Button>
       <Button

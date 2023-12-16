@@ -6,8 +6,9 @@ import { auth } from "../_libs/auth";
 import prisma from "../_libs/prisma";
 import { getSpotifyApi } from "../_libs/spotify";
 
+const NEXT_AUTH_SESSION_COOKIE_NAME = "next-auth.session-token";
 export const signOutServerSide = async (): Promise<void> => {
-  const sessionCookie = cookies().get("next-auth.session-token");
+  const sessionCookie = cookies().get(NEXT_AUTH_SESSION_COOKIE_NAME);
   if (!sessionCookie) {
     return;
   }
@@ -20,6 +21,7 @@ export const signOutServerSide = async (): Promise<void> => {
   } catch (error) {
     console.log(error);
   }
+  cookies().delete(NEXT_AUTH_SESSION_COOKIE_NAME);
   return;
 };
 
