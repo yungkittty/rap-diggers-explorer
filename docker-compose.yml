@@ -10,3 +10,19 @@ services:
       - "5432:5432"
     volumes:
       - ./database:/var/lib/postgresql/data
+
+  rap-diggers-explorer-redis:
+    image: redis
+    container_name: rap-diggers-explorer-redis
+    ports:
+      - "6379:6379"
+
+  rap-diggers-explorer-redis-http:
+    image: hiett/serverless-redis-http:latest
+    container_name: rap-diggers-explorer-redis-http
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: redis_token
+      SRH_CONNECTION_STRING: "redis://rap-diggers-explorer-redis:6379"
+    ports:
+      - "8079:80"

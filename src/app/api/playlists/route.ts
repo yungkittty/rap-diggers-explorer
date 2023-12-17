@@ -4,88 +4,92 @@ import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { POST_PlaylistsInputSchema } from "@/app/_types/api";
 import { upsertArtistStatus } from "@/app/_utils/artists";
 import { withAuth } from "@/app/_utils/auth";
+import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
 
-export const POST = withAuth(
-  async (
-    request, //
-    _,
-    userId,
-    spotifyApi,
-  ) => {
-    const data = await request.json();
-    if (!POST_PlaylistsInputSchema.safeParse(data).success) {
-      return Response.json(
-        { error: ErrorCode.INPUT_INVALID }, //
-        { status: 400 },
-      );
-    }
+export const POST = withRate(
+  { weight: 25 },
+  withAuth(
+    async (
+      request, //
+      _,
+      userId,
+      spotifyApi,
+    ) => {
+      const data = await request.json();
+      if (!POST_PlaylistsInputSchema.safeParse(data).success) {
+        return Response.json(
+          { error: ErrorCode.INPUT_INVALID }, //
+          { status: 400 },
+        );
+      }
 
-    const playlistStatus = await prisma.playlistStatus.findMany({
-      select: {
-        id: true,
-      },
-      where: {
-        userId,
-      },
-    });
-    if (playlistStatus.length) {
-      return Response.json(
-        { error: ErrorCode.USER_FORBIDDEN_MAX_PLAYLISTS }, //
-        { status: 403 },
-      );
-    }
-
-    const { spotifyPlaylistId } = data as POST_PlaylistsInput;
-    let spotifyArtistIds: string[] = [];
-    try {
-      spotifyArtistIds = await getSpotifyPlaylistArtistIds(
-        spotifyApi,
-        spotifyPlaylistId,
-      );
-    } catch (error) {
-      console.log(error);
-      return Response.json(
-        { error: ErrorCode.SPOTIFY_UNKNOWN }, //
-        { status: 500 },
-      );
-    }
-
-    await prisma.$transaction(async (tx) => {
-      const { id: playlistId } = await tx.playlist.upsert({
+      const playlistStatus = await prisma.playlistStatus.findMany({
+        select: {
+          id: true,
+        },
         where: {
-          spotifyId: spotifyPlaylistId,
+          userId,
         },
-        create: {
-          spotifyId: spotifyPlaylistId,
-        },
-        update: {},
       });
+      if (playlistStatus.length) {
+        return Response.json(
+          { error: ErrorCode.USER_FORBIDDEN_MAX_PLAYLISTS }, //
+          { status: 403 },
+        );
+      }
 
-      await tx.playlistStatus.upsert({
-        where: {
-          userId_playlistId: {
+      const { spotifyPlaylistId } = data as POST_PlaylistsInput;
+      let spotifyArtistIds: string[] = [];
+      try {
+        spotifyArtistIds = await getSpotifyPlaylistArtistIds(
+          spotifyApi,
+          spotifyPlaylistId,
+        );
+      } catch (error) {
+        console.log(error);
+        return Response.json(
+          { error: ErrorCode.SPOTIFY_UNKNOWN }, //
+          { status: 500 },
+        );
+      }
+
+      await prisma.$transaction(async (tx) => {
+        const { id: playlistId } = await tx.playlist.upsert({
+          where: {
+            spotifyId: spotifyPlaylistId,
+          },
+          create: {
+            spotifyId: spotifyPlaylistId,
+          },
+          update: {},
+        });
+
+        await tx.playlistStatus.upsert({
+          where: {
+            userId_playlistId: {
+              userId,
+              playlistId,
+            },
+          },
+          create: {
             userId,
             playlistId,
           },
-        },
-        create: {
+          update: {},
+        });
+
+        await upsertArtistStatus(
+          tx, //
           userId,
-          playlistId,
-        },
-        update: {},
+          spotifyArtistIds,
+        );
       });
 
-      await upsertArtistStatus(
-        tx, //
-        userId,
-        spotifyArtistIds,
+      return Response.json(
+        {}, //
+        { status: 200 },
       );
-    });
-
-    return Response.json(
-      {}, //
-      { status: 200 },
-    );
-  },
+    },
+  ),
 );
