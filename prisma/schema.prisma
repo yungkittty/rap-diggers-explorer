@@ -116,6 +116,7 @@ model ArtistStatus {
   dislikedAt DateTime?
   snoozedAt  DateTime?
 
+  importedAt DateTime?
   exportedAt DateTime?
 
   createdAt DateTime @default(now())

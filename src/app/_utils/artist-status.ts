@@ -12,6 +12,7 @@ export const upsertArtistStatus = async (
   >,
   userId: string,
   spotifyArtistIds: string[],
+  options: { isImported: boolean } = { isImported: false },
 ): Promise<void> => {
   for (const spotifyArtistId of spotifyArtistIds) {
     const { id: artistId } = await tx.artist.upsert({
@@ -34,6 +35,7 @@ export const upsertArtistStatus = async (
       create: {
         userId,
         artistId,
+        importedAt: options.isImported ? new Date() : null,
       },
       update: {},
     });

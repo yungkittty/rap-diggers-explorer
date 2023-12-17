@@ -2,7 +2,7 @@ import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
 import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { POST_PlaylistsInputSchema } from "@/app/_types/api";
-import { upsertArtistStatus } from "@/app/_utils/artists";
+import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
@@ -83,6 +83,7 @@ export const POST = withRate(
           tx, //
           userId,
           spotifyArtistIds,
+          { isImported: true },
         );
       });
 

@@ -4,7 +4,7 @@ import {
   PUT_ArtistStatusInput,
   PUT_ArtistStatusInputSchema,
 } from "@/app/_types/api";
-import { upsertArtistStatus } from "@/app/_utils/artists";
+import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
 import { withRate } from "@/app/_utils/rate";
 

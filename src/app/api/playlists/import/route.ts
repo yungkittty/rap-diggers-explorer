@@ -1,9 +1,24 @@
 import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
-import { upsertArtistStatus } from "@/app/_utils/artists";
+import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
+import { isImportable } from "@/app/_utils/playlists";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
+
+export const GET = withAuth(
+  async (
+    request, //
+    _,
+    userId,
+  ) => {
+    const isImportable_ = await isImportable(userId);
+    return Response.json(
+      { isImportable: isImportable_ }, //
+      { status: 200 },
+    );
+  },
+);
 
 export const POST = withRate(
   { weight: 25 },
@@ -14,6 +29,14 @@ export const POST = withRate(
       userId,
       spotifyApi,
     ) => {
+      const isImportable_ = await isImportable(userId);
+      if (!isImportable_) {
+        return Response.json(
+          { error: ErrorCode.USER_FORBIDDEN_MAX_IMPORTS }, //
+          { status: 403 },
+        );
+      }
+
       const playlistStatus = await prisma.playlistStatus.findMany({
         select: {
           playlist: {
@@ -58,6 +81,7 @@ export const POST = withRate(
           tx, //
           userId,
           spotifyArtistIds,
+          { isImported: true },
         );
       });
 

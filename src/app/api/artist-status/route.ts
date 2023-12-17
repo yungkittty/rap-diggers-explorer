@@ -9,10 +9,6 @@ const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
 const GET_ARTIST_STATUS_DEFAULT_LIMIT = 10;
 const GET_ARTIST_STATUS_MAX_LIMIT = 50;
 
-// @TODO - This should be removed?
-// This makes sure returned data isn't cached!
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#options
-export const dynamic = "force-dynamic";
 export const GET = withRate(
   { weight: 1 },
   withAuth(

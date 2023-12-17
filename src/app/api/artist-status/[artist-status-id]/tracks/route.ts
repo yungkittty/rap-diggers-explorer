@@ -9,10 +9,6 @@ const SPOTIFY_ALBUMS_LIMIT = 3;
 const SPOTIFY_TRACKS_LIMIT = 8;
 const SPOTIFY_MARKET = "FR" as const; // @TODO - ...
 
-// @TODO - This should be removed?
-// This makes sure returned data isn't cached!
-// https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#options
-export const dynamic = "force-dynamic";
 export const GET = withRate(
   { weight: 1 + SPOTIFY_ALBUMS_LIMIT },
   withAuth(
