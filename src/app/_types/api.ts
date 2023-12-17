@@ -22,6 +22,14 @@ export type POST_PlaylistsOutput = API_Ouput & {};
 export type POST_PlaylistsImportOutput = API_Ouput & {};
 
 //
+// API/GET - /api/playlists/is-importable
+//
+
+export type GET_PlaylistsIsImportableOutput = {
+  isImportable: boolean;
+};
+
+//
 // API/GET - /api/artist-status
 //
 

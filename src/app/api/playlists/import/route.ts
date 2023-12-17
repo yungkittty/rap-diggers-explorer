@@ -6,20 +6,6 @@ import { isImportable } from "@/app/_utils/playlists";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
 
-export const GET = withAuth(
-  async (
-    request, //
-    _,
-    userId,
-  ) => {
-    const isImportable_ = await isImportable(userId);
-    return Response.json(
-      { isImportable: isImportable_ }, //
-      { status: 200 },
-    );
-  },
-);
-
 export const POST = withRate(
   { weight: 25 },
   withAuth(
