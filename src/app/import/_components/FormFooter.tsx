@@ -82,7 +82,7 @@ export const FormFooter = () => {
     toast({
       variant: "destructive",
       title: "Erreur",
-      description: "Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
     });
   };
 

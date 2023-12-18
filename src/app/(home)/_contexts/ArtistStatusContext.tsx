@@ -1,10 +1,13 @@
 "use client";
 
+import { useToast } from "@/app/_components/ui/use-toast";
+import { ErrorCode } from "@/app/_constants/error-code";
 import type {
   GET_ArtistStatusOuput,
   GET_ArtistStatusOuputDataItem,
 } from "@/app/_types/api";
 import React, { PropsWithChildren, useState } from "react";
+import { SWRConfiguration } from "swr";
 import useSWRImmutable from "swr/immutable";
 import {
   ARTIST_CARDS_CAROUSEL_OFFSET,
@@ -49,8 +52,37 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const artistStatusNext: GET_ArtistStatusOuputDataItem | null =
     artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET + 1] || null;
 
+  const { toast } = useToast();
+  const handleError = () => {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+    });
+    return;
+  };
+
+  // @TODO - This should handle when there're no data left ...
+  // ... and also on error as data is empty!
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
+    if (data.error) {
+      switch (data.error) {
+        case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+          });
+          return;
+        }
+        default: {
+          handleError();
+          return;
+        }
+      }
+    }
+
     const { data: nextArtistStatus = [] } = data;
     setArtistStatus((previousArtistStatus) => [
       ...(isInitialLoading
@@ -58,10 +90,10 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
         : previousArtistStatus),
       ...nextArtistStatus,
     ]);
+
     setIsInitialLoading(false);
   };
 
-  // @TODO - This should handle errors! (only spotify?)
   const [
     [offset, offsetId], //
     setOffset,
@@ -72,10 +104,15 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
       offset: String(offset),
       limit: String(ARTIST_CARDS_CAROUSEL_FETCH_SIZE),
     }).toString();
+  const swrOptions: SWRConfiguration = {
+    onSuccess: handleSuccess,
+    onError: handleError,
+    shouldRetryOnError: false,
+  };
   useSWRImmutable(
     [url, offsetId], //
     getArtistStatus,
-    { onSuccess: handleSuccess /*, onError: () => {} */ },
+    swrOptions,
   );
 
   // @TODO - This could prevent unnecessary fetch ...
