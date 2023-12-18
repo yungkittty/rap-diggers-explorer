@@ -28,10 +28,11 @@ import {
 import { useToast } from "@/app/_components/ui/use-toast";
 import { DELETE_UsersOuput } from "@/app/_types/api";
 import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
 import useSWRMutation from "swr/mutation";
 
-const deleteUser = async (url: string): Promise<DELETE_UsersOuput> => {
+const deleteUsers = async (url: string): Promise<DELETE_UsersOuput> => {
   const fetchOptions: RequestInit = {
     method: "DELETE",
     headers: {
@@ -51,26 +52,28 @@ export const TopBarAvatarMenu = () => {
     );
   };
 
+  const router = useRouter();
   const { toast } = useToast();
   const { trigger, isMutating } = useSWRMutation(
     "/api/users", //
-    deleteUser,
+    deleteUsers,
   );
   const handleDelete = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     try {
       await trigger();
-      await handleSignOut();
+      router.replace("/sign-in");
       return;
     } catch (error) {
+      console.log(error);
       if (process.env.VERCEL_ENV !== "production") {
         console.log(error);
       }
     }
-    // @TODO - ...
     toast({
-      title: "",
-      description: "",
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
     });
   };
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { ArtistsStatusContext } from "@/app/(home)/_contexts/ArtistStatusContext";
+import { useToast } from "@/app/_components/ui/use-toast";
+import { ErrorCode } from "@/app/_constants/error-code";
 import {
   GET_ArtistStatusTracksOutput,
   GET_ArtistStatusTracksOutputDataItem,
@@ -15,6 +17,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { SWRConfiguration } from "swr";
 import useSWRImmutable from "swr/immutable";
 
 const getArtistStatusTracks = async (
@@ -68,19 +71,51 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
   const { artistStatusCurrent, artistStatusNext } =
     useContext(ArtistsStatusContext);
 
-  // @TODO - This should handle errors! (only spotify?)
+  const { toast } = useToast();
+  const handleError = () => {
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+    });
+    return;
+  };
+  const handleSuccess = (data: GET_ArtistStatusTracksOutput) => {
+    if (!data.error) {
+      return;
+    }
+    switch (data.error) {
+      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+        });
+        return;
+      }
+      default: {
+        handleError();
+        return;
+      }
+    }
+  };
+  const swrOptions: SWRConfiguration<GET_ArtistStatusTracksOutput> = {
+    onSuccess: handleSuccess,
+    onError: handleError,
+    shouldRetryOnError: false,
+  };
+
   let artistStatusId = artistStatusCurrent?.id || null;
   const { data, isLoading: isLoading_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
-    // { onError: () => {} },
+    swrOptions,
   );
-  // This allows to pre-fetch next track(s)!
   artistStatusId = artistStatusNext?.id || null;
   useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
-    // { onError: () => {} },
+    swrOptions,
   );
 
   const [trackIndex, setTrackIndex] = useState(0);
@@ -164,9 +199,6 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
 
   useEffect(
     () => {
-      if (!artistStatusCurrent) {
-        return;
-      }
       setIsLoading(true);
       setTrackIndex(0);
       setTrackCurrentMetadata(null);

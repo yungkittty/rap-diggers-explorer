@@ -8,8 +8,8 @@ import { ArtistsStatusContextProvider } from "./_contexts/ArtistStatusContext";
 const HomePage = () => {
   return (
     <div className="flex flex-col flex-1">
-      <TopBar />
       <ArtistsStatusContextProvider>
+        <TopBar />
         <div className="flex flex-col flex-1 justify-end">
           <ArtistCardsCarousel />
           <ActionsBar />

@@ -3,6 +3,7 @@
 import { Icon } from "@/app/_components/Icon";
 import { Button, ButtonProps } from "@/app/_components/ui/button";
 import { useToast } from "@/app/_components/ui/use-toast";
+import { ErrorCode } from "@/app/_constants/error-code";
 import { cn } from "@/app/_libs/shadcn";
 import {
   PUT_ArtistStatusInput,
@@ -61,7 +62,7 @@ const ActionButton = (props: ActionButtonProps) => {
   );
 };
 
-const updateArtistStatus = async (
+const putArtistStatus = async (
   url: string,
   { arg: { action } }: { arg: PUT_ArtistStatusInput },
 ): Promise<PUT_ArtistStatusOutput> => {
@@ -89,7 +90,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
   const artistStatusId = artistStatusCurrent?.id || null;
   const { trigger, isMutating } = useSWRMutation(
     artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
-    updateArtistStatus,
+    putArtistStatus,
   );
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
@@ -102,15 +103,25 @@ export const ActionsBar = (props: ActionsBarProps) => {
           nextArtistStatus();
           return;
         }
+        switch (data.error) {
+          case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+            toast({
+              variant: "destructive",
+              title: "Erreur",
+              description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+            });
+            return;
+          }
+        }
       } catch (error) {
         if (process.env.VERCEL_ENV !== "production") {
           console.log(error);
         }
       }
-      // @TODO - ...
       toast({
-        title: "",
-        description: "",
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
       });
     };
 
