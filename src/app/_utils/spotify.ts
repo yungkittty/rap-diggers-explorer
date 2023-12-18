@@ -6,6 +6,7 @@ import type {
   SpotifyApi,
 } from "@spotify/web-api-ts-sdk";
 import { ErrorCode } from "../_constants/error-code";
+import { CustomError } from "./errors";
 
 const SPOTIFY_GET_PLAYLIST_ARTISTS_MAX_TRACKS = 1000;
 const SPOTIFY_GET_PLAYLIST_ARTISTS_LIMIT_TRACKS = 50;
@@ -23,9 +24,8 @@ export const getSpotifyPlaylistArtistIds = async (
     throw error;
   }
 
-  // @TODO - ...
   if (spotifyPlaylist.tracks.total > SPOTIFY_GET_PLAYLIST_ARTISTS_MAX_TRACKS) {
-    throw { name: ErrorCode.USER_FORBIDDEN_MAX_TRACKS };
+    throw new CustomError(ErrorCode.USER_FORBIDDEN_MAX_TRACKS);
   }
 
   const spotifyPlaylistItems = spotifyPlaylist.tracks.items;

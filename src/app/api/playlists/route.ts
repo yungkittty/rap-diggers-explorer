@@ -4,11 +4,12 @@ import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { POST_PlaylistsInputSchema } from "@/app/_types/api";
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
+import { CustomError } from "@/app/_utils/errors";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
 
 export const POST = withRate(
-  { weight: 25 },
+  { weight: 20 },
   withAuth(
     async (
       request, //
@@ -48,6 +49,16 @@ export const POST = withRate(
         );
       } catch (error) {
         console.log(error);
+        if (error instanceof CustomError) {
+          switch (error.code) {
+            case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
+              return Response.json(
+                { error: ErrorCode.USER_FORBIDDEN_MAX_TRACKS }, //
+                { status: 403 },
+              );
+            }
+          }
+        }
         return Response.json(
           { error: ErrorCode.SPOTIFY_UNKNOWN }, //
           { status: 500 },

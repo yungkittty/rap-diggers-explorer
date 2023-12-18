@@ -2,6 +2,7 @@
 
 import { Icon } from "@/app/_components/Icon";
 import { useToast } from "@/app/_components/ui/use-toast";
+import { ErrorCode } from "@/app/_constants/error-code";
 import type {
   POST_PlaylistsInput,
   POST_PlaylistsOutput,
@@ -14,7 +15,7 @@ import { Button } from "../../_components/ui/button";
 import { CardFooter } from "../../_components/ui/card";
 import { Input } from "../../_components/ui/input";
 
-const createPlaylist = async (
+const postPlaylists = async (
   url: string, //
   { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsInput },
 ): Promise<POST_PlaylistsOutput> => {
@@ -44,33 +45,48 @@ export const FormFooter = () => {
   const { toast } = useToast();
   const { trigger, isMutating } = useSWRMutation(
     "/api/playlists", //
-    createPlaylist,
+    postPlaylists,
   );
-  const handleClick = useCallback(
-    async () => {
-      try {
-        const data = await trigger({ spotifyPlaylistId: value });
-        if (!data.error) {
-          router.replace("/");
+  const handleClick = async () => {
+    if (!value || isMutating) {
+      return;
+    }
+    try {
+      const data = await trigger({ spotifyPlaylistId: value });
+      if (!data.error) {
+        router.replace("/");
+        return;
+      }
+      switch (data.error) {
+        case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
+          toast({
+            title: "Erreur",
+            description: "Ta playlist contient plus de 1000 titres !",
+          });
           return;
         }
-      } catch (error) {
-        if (process.env.VERCEL_ENV !== "production") {
-          console.log(error);
+        case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+          toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+          });
+          return;
         }
       }
-      // @TODO - ...
-      toast({
-        title: "",
-        description: "",
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [value],
-  );
+    } catch (error) {
+      if (process.env.VERCEL_ENV !== "production") {
+        console.log(error);
+      }
+    }
+    toast({
+      variant: "destructive",
+      title: "Erreur",
+      description: "Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+    });
+  };
 
   const isDisabled = isMutating || !Boolean(value);
-
   return (
     <CardFooter className="flex flex-col">
       <div className="relative w-full">

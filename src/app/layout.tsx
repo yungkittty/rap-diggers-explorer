@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "./_components/ui/toaster";
 import { AuthProvider } from "./_contexts/AuthContext";
-import { DataProvider } from "./_contexts/DataContext";
 import { auth } from "./_libs/auth";
 import { cn } from "./_libs/shadcn";
 import "./globals.css";
@@ -70,12 +69,10 @@ const RootLayout = async (props: RootLayoutProps) => {
           helvetica.variable,
         )}
       >
-        <DataProvider>
-          <AuthProvider session={session}>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </DataProvider>
+        <AuthProvider session={session}>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
