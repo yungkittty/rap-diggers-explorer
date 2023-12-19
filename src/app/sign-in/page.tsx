@@ -13,6 +13,8 @@ const SignInPage = () => {
         src={LogoSVG}
         width={192}
         alt="" // @TODO - ...
+        priority
+        loading="eager"
       />
       <div className="z-10 mb-[-6px] px-2 py-1 rounded-sm bg-foreground">
         <Heading className="text-white">explorer</Heading>

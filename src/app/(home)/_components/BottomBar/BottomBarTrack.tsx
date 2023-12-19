@@ -23,6 +23,8 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
                 src={trackCurrent.spotifyImageUrl}
                 alt="" // @TODO - ...
                 fill
+                priority
+                loading="eager"
               />
             ) : null}
           </div>

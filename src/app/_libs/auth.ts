@@ -25,6 +25,13 @@ export const {
       },
     }),
   ],
+  // @TODO - ...
+  // https://next-auth.js.org/configuration/pages
+  pages: {
+    signIn: "",
+    signOut: "",
+    error: "",
+  },
   callbacks: {
     async signIn(params) {
       if (!params.account) {

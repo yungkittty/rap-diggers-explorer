@@ -42,7 +42,7 @@ export const TopBarManualButton = () => {
       <DialogTrigger asChild>
         <div className="relative">
           {isShown ? (
-            <div className="absolute right-[-3.5px] top-[-2.5px] h-3 aspect-square rounded-full bg-foreground" />
+            <div className="absolute right-[-3.5px] top-[-2.5px] h-3 aspect-square rounded-full shadow-xs bg-foreground" />
           ) : null}
           <Button variant="outline" size="icon" onClick={handleClick}>
             <Icon name="book" filled />
