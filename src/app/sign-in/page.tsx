@@ -24,7 +24,7 @@ const SignInPage = () => {
         <Card className="p-3">
           <SpotifyButton />
         </Card>
-        <Text className="text-center mt-3 text-[10px] text-primary/50">
+        <Text className="text-center mt-3 text-xs text-primary/50">
           En continuant, tu acceptes les
           <a
             className="mx-0.5 underline"
