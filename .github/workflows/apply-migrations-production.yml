@@ -1,11 +1,11 @@
-name: apply-migrations-staging
+name: apply-migrations-production
 on:
   push:
     branches:
-      - master
+      - production
 
 jobs:
-  apply-migrations-staging:
+  apply-migrations-production:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,5 +19,5 @@ jobs:
       - name: Apply all pending migrations to the database
         run: bun prisma migrate deploy
         env:
-          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL_STAGING }}
-          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING_STAGING }}
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
