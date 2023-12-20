@@ -24,16 +24,20 @@ const SignInPage = () => {
         <Card className="p-3">
           <SpotifyButton />
         </Card>
+        <Text className="text-center mt-2 text-[10px] text-primary/50">
+          … et en continuant, tu acceptes conditions générales d’utilisation
+          ainsi que la politique de confidentialité.
+        </Text>
       </div>
-      <div className="absolute bottom-[24px] flex flex-row text-xs text-primary/50">
+      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/30">
         <a href="/legal-notices.txt">
           <Text className="uppercase">mentions légales</Text>
         </a>
-        <span className="mx-3">|</span>
+        <span className="mx-1.5">|</span>
         <a href="/terms-and-conditions.txt">
           <Text className="uppercase">conditions générales d’utilisation</Text>
         </a>
-        <span className="mx-3">|</span>
+        <span className="mx-1.5">|</span>
         <a href="privacy-policy.txt">
           <Text className="uppercase">politique de confidentialité</Text>
         </a>
