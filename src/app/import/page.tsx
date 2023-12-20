@@ -1,5 +1,4 @@
 import { Heading } from "../_components/Heading";
-import { Icon } from "../_components/Icon";
 import { Text } from "../_components/Text";
 import { Card, CardHeader, CardTitle } from "../_components/ui/card";
 import { withAuth } from "../_hocs/auth";
@@ -15,14 +14,11 @@ const ImportPage = () => {
           </CardTitle>
           {/* <CardDescription> - text-sm text-muted-foreground */}
           <Text className="text-base text-primary/70">
-            Importe tes artistes depuis une playlist{" "}
-            <span className="text-spotify">
-              Spotify <Icon className="text-base mx-[-2px]" name="spotify" />
-            </span>{" "}
-            pour former la base de tes recherches. Par la suite, tu pourras
-            décider, ou non, de creuser certains de ces artistes pour t’en voir
-            proposer des similaires. C’est par la répétition de ce procédé que
-            tu découvriras la future pépite.
+            Importe tes artistes depuis une playlist Spotify pour former la base
+            de tes recherches. Par la suite, tu pourras décider, ou non, de
+            creuser certains de ces artistes pour t’en voir proposer des
+            similaires. C’est par la répétition de ce procédé que tu découvriras
+            la future pépite.
             <span className="text-primary">✨</span>
           </Text>
           {/* </CardDescription> */}

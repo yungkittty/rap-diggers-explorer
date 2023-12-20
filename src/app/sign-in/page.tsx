@@ -11,7 +11,7 @@ const SignInPage = () => {
     <div className="relative flex flex-col flex-1 justify-center items-center">
       <div className="relative flex flex-col items-center justify-center">
         <Image
-          className="absolute top-[-62px] ml-[-6px] rotate-2"
+          className="absolute top-[-63px] ml-[-6px] rotate-2"
           src={LogoSVG}
           width={192}
           alt="" // @TODO - ...
@@ -24,12 +24,12 @@ const SignInPage = () => {
         <Card className="p-3">
           <SpotifyButton />
         </Card>
-        <Text className="text-center mt-2 text-[10px] text-primary/50">
-          … et en continuant, tu acceptes conditions générales d’utilisation
+        <Text className="text-center mt-2.5 text-[10px] text-primary/50">
+          En continuant, tu acceptes les conditions générales d’utilisation
           ainsi que la politique de confidentialité.
         </Text>
       </div>
-      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/30">
+      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/50">
         <a href="/legal-notices.txt">
           <Text className="uppercase">mentions légales</Text>
         </a>
