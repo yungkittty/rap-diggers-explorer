@@ -25,11 +25,18 @@ const SignInPage = () => {
           <SpotifyButton />
         </Card>
         <Text className="text-center mt-2.5 text-[10px] text-primary/50">
-          En continuant, tu acceptes les conditions générales d’utilisation
-          ainsi que la politique de confidentialité.
+          En continuant, tu acceptes les
+          <a className="mx-0.5 underline" href="/terms-and-conditions.txt">
+            conditions générales d’utilisation
+          </a>
+          ainsi que la
+          <a className="ml-0.5 underline" href="privacy-policy.txt">
+            politique de confidentialité
+          </a>
+          .
         </Text>
       </div>
-      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/50">
+      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/30">
         <a href="/legal-notices.txt">
           <Text className="uppercase">mentions légales</Text>
         </a>
