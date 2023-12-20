@@ -69,6 +69,7 @@ export type PUT_ArtistStatusOutput = API_Ouput & {};
 
 export type GET_ArtistStatusTracksOutputDataItem = {
   spotifyUrl: string;
+  spotifyPreviewUrl: string;
   spotifyImageUrl?: string;
   spotifyName: string;
   spotifyArtistNames: string[];

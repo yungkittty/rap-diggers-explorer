@@ -82,7 +82,7 @@ export const TopBarManualButton = () => {
           </ManualLine>
           {/* prettier-ignore */}
           <Text className="mt-2 text-sm text-primary/50">
-            <span className="italic">creuser</span><span className="ml-1.5 mr-2">:</span>chercher les artistes similaires
+            <span className="italic">creuser</span><span className="mx-1.5">:</span>chercher les artistes similaires
           </Text>
         </div>
       </DialogContent>

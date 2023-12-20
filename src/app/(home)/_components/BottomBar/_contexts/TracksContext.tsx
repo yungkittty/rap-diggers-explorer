@@ -257,7 +257,7 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
       {trackCurrent ? (
         <audio
           ref={audioRef}
-          src={trackCurrent.spotifyUrl}
+          src={trackCurrent.spotifyPreviewUrl}
           onLoadStart={handleLoadStart}
           onLoadedMetadata={handleLoadedMetadata}
           onCanPlayThrough={handleCanPlayThrough}

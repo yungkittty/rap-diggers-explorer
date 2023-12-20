@@ -113,7 +113,7 @@ export const TopBarAvatarMenu = () => {
           <Heading>Est-ce que tu es sûr ?</Heading>
         </AlertDialogTitle>
         <AlertDialogDescription>
-          <Text className="text-base text-primary/70">
+          <Text className="text-base text-primary/70 mb-0.5">
             Si tu décides de te désinscrire, ton compte sera supprimé ainsi que
             l’ensemble des données qui y sont associées, et cela de manière
             irréversible. <span className="text-primary">😵‍💫</span>

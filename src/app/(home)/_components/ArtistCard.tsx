@@ -88,9 +88,9 @@ export const ArtistCard = (props: ArtistCardProps) => {
               abonné·e·s
             </Text>
           </div>
-          <a className="mt-auto" href={artist?.spotifyUrl} target="_blank">
+          <a className="flex mt-auto" href={artist?.spotifyUrl} target="_blank">
             <Icon
-              className="text-3xl text-primary hover:text-spotify transition-colors"
+              className="text-3xl text-primary hover:text-spotify transition-colors leading-none"
               name="spotify"
             />
           </a>

@@ -104,7 +104,8 @@ export const GET = withRate(
                     spotifyTrack.preview_url != null,
                 )
                 .map((spotifyTrack) => ({
-                  spotifyUrl: spotifyTrack.preview_url!,
+                  spotifyUrl: spotifyTrack.external_urls["spotify"],
+                  spotifyPreviewUrl: spotifyTrack.preview_url!,
                   spotifyImageUrl: spotifyAlbum.images[1]?.url, // = 64px
                   spotifyName: spotifyTrack.name,
                   spotifyArtistNames: spotifyTrack.artists.map((spotifyArtist) => spotifyArtist.name), // prettier-ignore
