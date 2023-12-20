@@ -28,7 +28,7 @@ For the purposes of these Terms and Conditions:
   * Country refers to: France
 
   * Company (referred to as either "the Company", "We", "Us" or "Our" in this
-    Agreement) refers to Rap Diggers • Explorer.
+    Agreement) refers to Rap Diggers - Explorer.
 
   * Device means any device that can access the Service such as a computer, a
     cellphone or a digital tablet.
@@ -45,7 +45,7 @@ For the purposes of these Terms and Conditions:
     data, information, products or services) provided by a third-party that
     may be displayed, included or made available by the Service.
 
-  * Website refers to Rap Diggers • Explorer, accessible from [explorer.rap-
+  * Website refers to Rap Diggers - Explorer, accessible from [explorer.rap-
     diggers.com](explorer.rap-diggers.com)
 
   * You means the individual accessing or using the Service, or the company,
@@ -183,15 +183,6 @@ For European Union (EU) Users
 If You are a European Union consumer, you will benefit from any mandatory
 provisions of the law of the country in which You are resident.
 
-United States Legal Compliance  
-------------------------------
-
-You represent and warrant that (i) You are not located in a country that is
-subject to the United States government embargo, or that has been designated
-by the United States government as a "terrorist supporting" country, and (ii)
-You are not listed on any United States government list of prohibited or
-restricted parties.
-
 Severability and Waiver  
 -----------------------
 
@@ -239,4 +230,3 @@ If you have any questions about these Terms and Conditions, You can contact
 us:
 
   * By email: rap-diggers@gmail.com
-

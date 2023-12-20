@@ -8,7 +8,7 @@ import { SpotifyButton } from "./_components/SpotifyButton";
 
 const SignInPage = () => {
   return (
-    <div className="relative flex flex-col flex-1 justify-center items-center">
+    <div className="relative flex flex-col flex-1 justify-center items-center px-12">
       <div className="relative flex flex-col items-center justify-center">
         <Image
           className="absolute top-[-63px] ml-[-6px] rotate-2"
@@ -24,28 +24,34 @@ const SignInPage = () => {
         <Card className="p-3">
           <SpotifyButton />
         </Card>
-        <Text className="text-center mt-2.5 text-[10px] text-primary/50">
+        <Text className="text-center mt-3 text-[10px] text-primary/50">
           En continuant, tu acceptes les
-          <a className="mx-0.5 underline" href="/terms-and-conditions.txt">
+          <a
+            className="mx-0.5 underline"
+            href="/conditions-generales-utilisation.txt"
+          >
             conditions générales d’utilisation
           </a>
           ainsi que la
-          <a className="ml-0.5 underline" href="privacy-policy.txt">
+          <a
+            className="ml-0.5 underline"
+            href="/politique-de-confidentialite.txt"
+          >
             politique de confidentialité
           </a>
           .
         </Text>
       </div>
-      <div className="absolute bottom-[12px] flex flex-row text-[10px] text-primary/30">
-        <a href="/legal-notices.txt">
+      <div className="absolute bottom-[12px] flex flex-row items-center text-[10px] text-primary/30">
+        <a href="/mentions-legales.txt">
           <Text className="uppercase">mentions légales</Text>
         </a>
-        <span className="mx-1.5">|</span>
-        <a href="/terms-and-conditions.txt">
+        <span className="mx-1.5 leading-none">|</span>
+        <a href="/conditions-generales-utilisation.txt">
           <Text className="uppercase">conditions générales d’utilisation</Text>
         </a>
-        <span className="mx-1.5">|</span>
-        <a href="privacy-policy.txt">
+        <span className="mx-1.5 leading-none">|</span>
+        <a href="/politique-de-confidentialite.txt">
           <Text className="uppercase">politique de confidentialité</Text>
         </a>
       </div>

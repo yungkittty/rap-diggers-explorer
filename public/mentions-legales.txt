@@ -1,0 +1,12 @@
+Legal Notice
+============
+
+Last updated: December 20, 2023
+
+This website is owned by Rap Diggers
+
+Publication Director: XXX
+
+Contact: rap-diggers@gmail.com
+
+Hosted on: Vercel
