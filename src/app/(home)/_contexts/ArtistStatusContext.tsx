@@ -31,14 +31,18 @@ export const ArtistsStatusContext = React.createContext<{
   reloadArtistStatus: () => void;
   artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
   artistStatusNext: GET_ArtistStatusOuputDataItem | null;
+  artistStatusIndex: number;
   artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
+  previousArtistStatus: () => void;
   nextArtistStatus: () => void;
 }>({
   isInitialLoading: true,
   reloadArtistStatus: () => {},
   artistStatusCurrent: null,
   artistStatusNext: null,
+  artistStatusIndex: 0,
   artistStatus: [],
+  previousArtistStatus: () => {},
   nextArtistStatus: () => {},
 });
 
@@ -49,10 +53,13 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     (GET_ArtistStatusOuputDataItem | null)[]
   >(Array(ARTIST_CARDS_CAROUSEL_SIZE).fill(null));
 
+  const [artistStatusIndex, setArtistStatusIndex] = useState(0);
+  const artistStatusCurrentIndex =
+    artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET;
   const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
-    artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET] || null;
+    artistStatus[artistStatusCurrentIndex] || null;
   const artistStatusNext: GET_ArtistStatusOuputDataItem | null =
-    artistStatus[ARTIST_CARDS_CAROUSEL_OFFSET + 1] || null;
+    artistStatus[artistStatusCurrentIndex + 1] || null;
 
   const { toast } = useToast();
   const handleError = () => {
@@ -121,25 +128,34 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     // mutate();
   };
 
-  // @TODO - This could prevent unnecessary fetch ...
-  // ... by setting state upon action type (!= like & size < X => avoid fetch)
-  const nextArtistStatus = () => {
-    if (isInitialLoading || !artistStatusCurrent) {
+  const previousArtistStatus = () => {
+    if (isInitialLoading) {
       return;
     }
-    setArtistStatus((previousArtistStatus) => {
-      const [, ...nextArtistStatus] = previousArtistStatus;
+    setArtistStatusIndex((previousArtistStatusIndex) => {
+      const nextArtistStatusIndex = previousArtistStatusIndex - 1;
+      return nextArtistStatusIndex;
+    });
+  };
+  const nextArtistStatus = () => {
+    if (isInitialLoading) {
+      return;
+    }
+    setArtistStatusIndex((previousArtistStatusIndex) => {
+      const nextArtistStatusIndex = previousArtistStatusIndex + 1;
       if (
-        nextArtistStatus.length <=
+        artistStatus.length - nextArtistStatusIndex <=
         ARTIST_CARDS_CAROUSEL_SIZE + ARTIST_CARDS_CAROUSEL_OFFSET
       ) {
-        const nextOffset = nextArtistStatus
-          .slice(ARTIST_CARDS_CAROUSEL_OFFSET)
+        const nextArtistStatusCurrentIndex =
+          nextArtistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET;
+        const nextOffset = artistStatus
+          .slice(nextArtistStatusCurrentIndex)
           .filter(Boolean).length;
-        const nextOffsetId = nextArtistStatus.at(-1)?.id || null;
+        const nextOffsetId = artistStatus.at(-1)?.id || null;
         setOffset([nextOffset, nextOffsetId]);
       }
-      return nextArtistStatus;
+      return nextArtistStatusIndex;
     });
   };
 
@@ -151,7 +167,9 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
         reloadArtistStatus,
         artistStatusCurrent,
         artistStatusNext,
+        artistStatusIndex,
         artistStatus,
+        previousArtistStatus,
         nextArtistStatus,
       }}
     />
