@@ -103,12 +103,12 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
       }
     }
   };
+
   const swrOptions: SWRConfiguration<GET_ArtistStatusTracksOutput> = {
     onSuccess: handleSuccess,
     onError: handleError,
     shouldRetryOnError: false,
   };
-
   let artistStatusId = artistStatusCurrent?.id || null;
   const { data, isLoading: isLoading_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
@@ -119,7 +119,7 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
   const { data: data_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
-    swrOptions,
+    { shouldRetryOnError: false },
   );
 
   const [trackIndex, setTrackIndex] = useState(0);

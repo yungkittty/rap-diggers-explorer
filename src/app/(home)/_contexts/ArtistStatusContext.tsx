@@ -28,14 +28,12 @@ Promise<GET_ArtistStatusOuput> => {
 
 export const ArtistsStatusContext = React.createContext<{
   isInitialLoading: boolean;
-  reloadArtistStatus: () => void;
   artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
   artistStatusNext: GET_ArtistStatusOuputDataItem | null;
   artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
   nextArtistStatus: () => void;
 }>({
   isInitialLoading: true,
-  reloadArtistStatus: () => {},
   artistStatusCurrent: null,
   artistStatusNext: null,
   artistStatus: [],
@@ -111,18 +109,12 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     onError: handleError,
     shouldRetryOnError: false,
   };
-  const { mutate } = useSWRImmutable(
+  useSWRImmutable(
     [url, offsetId], //
     getArtistStatus,
     swrOptions,
   );
-  // @TODO - This should allows refetch upon import!
-  const reloadArtistStatus = () => {
-    // mutate();
-  };
 
-  // @TODO - This could prevent unnecessary fetch ...
-  // ... by setting state upon action type (!= like & size < X => avoid fetch)
   const nextArtistStatus = () => {
     if (isInitialLoading || !artistStatusCurrent) {
       return;
@@ -148,7 +140,6 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
       {...props} //
       value={{
         isInitialLoading,
-        reloadArtistStatus,
         artistStatusCurrent,
         artistStatusNext,
         artistStatus,
