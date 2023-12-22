@@ -8,9 +8,16 @@ import { TracksContext } from "./_contexts/TracksContext";
 
 type BottomBarTrackProps = {};
 export const BottomBarTrack = (props: BottomBarTrackProps) => {
-  const { isInitialLoading, artistStatusCurrent } = useContext(ArtistsStatusContext); // prettier-ignore
+  const {
+    isInitialLoading, //
+    artistStatusCurrent,
+  } = useContext(ArtistsStatusContext);
 
-  const { trackCurrent } = useContext(TracksContext);
+  const {
+    trackCurrent, //
+    trackNext,
+    nextTrackCurrent,
+  } = useContext(TracksContext);
 
   return (
     <div className="flex flex-row flex-1">
@@ -24,6 +31,28 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
                 alt="" // @TODO - ...
                 fill
                 priority
+                loading="eager"
+              />
+            ) : null}
+            {/* This preload artist next track cover! */}
+            {trackNext?.spotifyImageUrl ? (
+              <Image
+                className="opacity-0"
+                src={trackNext.spotifyImageUrl}
+                alt="" // @TODO - ...
+                fill
+                // priority
+                loading="eager"
+              />
+            ) : null}
+            {/* This preload next artist track cover! */}
+            {nextTrackCurrent?.spotifyImageUrl ? (
+              <Image
+                className="opacity-0"
+                src={nextTrackCurrent.spotifyImageUrl}
+                alt="" // @TODO - ...
+                fill
+                // priority
                 loading="eager"
               />
             ) : null}

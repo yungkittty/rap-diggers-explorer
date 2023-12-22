@@ -45,6 +45,8 @@ export const TracksContext = React.createContext<{
   tracks: GET_ArtistStatusTracksOutputDataItem[];
   trackCurrent: GET_ArtistStatusTracksOutputDataItem | null;
   trackCurrentMetadata: TrackCurrentMetadata | null;
+  trackNext: GET_ArtistStatusTracksOutputDataItem | null;
+  nextTrackCurrent: GET_ArtistStatusTracksOutputDataItem | null;
   previousTrack: () => void;
   nextTrack: () => void;
   toggleTrack: () => void;
@@ -57,6 +59,8 @@ export const TracksContext = React.createContext<{
   tracks: [],
   trackCurrent: null,
   trackCurrentMetadata: null,
+  trackNext: null,
+  nextTrackCurrent: null,
   previousTrack: () => {},
   nextTrack: () => {},
   toggleTrack: () => {},
@@ -112,15 +116,18 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
     swrOptions,
   );
   artistStatusId = artistStatusNext?.id || null;
-  useSWRImmutable(
+  const { data: data_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
     swrOptions,
   );
 
   const [trackIndex, setTrackIndex] = useState(0);
-  const tracks: GET_ArtistStatusTracksOutputDataItem[] = data?.data || []; // prettier-ignore
+  const tracks: GET_ArtistStatusTracksOutputDataItem[] = data?.data || [];
   const trackCurrent: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex] || null; // prettier-ignore
+  const trackNext: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex + 1] || null; // prettier-ignore
+  const nextTracks: GET_ArtistStatusTracksOutputDataItem[] = data_?.data || [];
+  const nextTrackCurrent = nextTracks[0] || null;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const toggleTrack = () => {
@@ -248,6 +255,8 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
         tracks,
         trackCurrent,
         trackCurrentMetadata,
+        trackNext,
+        nextTrackCurrent,
         previousTrack,
         nextTrack,
         toggleTrack,

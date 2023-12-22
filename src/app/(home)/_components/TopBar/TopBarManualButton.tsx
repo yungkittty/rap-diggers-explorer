@@ -58,7 +58,7 @@ export const TopBarManualButton = () => {
         <div className="flex flex-col gap-1.5">
           {/* prettier-ignore */}
           <ManualLine iconName="check">
-            Je <span className="italic mr-0.5">creuse</span> l’artiste.
+            Je <span className="italic mr-0.5">creuse</span> l’artiste seulement.
           </ManualLine>
           {/* prettier-ignore */}
           <ManualLine iconName="heart">
