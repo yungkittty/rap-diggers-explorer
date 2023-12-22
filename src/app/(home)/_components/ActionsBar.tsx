@@ -83,25 +83,24 @@ type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
   const {
     artistStatusCurrent, //
-    previousArtistStatus,
     nextArtistStatus,
   } = useContext(ArtistsStatusContext);
 
   const { toast } = useToast();
   const artistStatusId = artistStatusCurrent?.id || null;
-  const { trigger } = useSWRMutation(
+  const { trigger, isMutating } = useSWRMutation(
     artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
     putArtistStatus,
   );
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (!artistStatusId) {
+      if (!artistStatusId || isMutating) {
         return;
       }
       try {
-        nextArtistStatus();
         const data = await trigger({ action });
         if (!data.error) {
+          nextArtistStatus();
           return;
         }
         switch (data.error) {
@@ -111,20 +110,19 @@ export const ActionsBar = (props: ActionsBarProps) => {
               title: "Erreur",
               description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
             });
-            break;
+            return;
           }
         }
       } catch (error) {
         if (process.env.VERCEL_ENV !== "production") {
           console.log(error);
         }
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-        });
       }
-      previousArtistStatus();
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+      });
     };
 
   return (
