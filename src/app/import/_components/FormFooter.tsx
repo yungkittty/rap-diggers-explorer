@@ -103,7 +103,7 @@ export const FormFooter = () => {
         />
       </div>
       <Button
-        className="mt-3.5 w-full"
+        className="mt-3 w-full"
         size="lg"
         onClick={handleClick}
         disabled={isDisabled}
