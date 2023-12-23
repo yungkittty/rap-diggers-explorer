@@ -23,18 +23,17 @@ const ImportPage = () => {
             de ces artistes pour t’en voir proposer des similaires et cela ainsi
             de suite jusqu’à la découverte de ta futur pépite. */}
           <Text className="text-base text-primary/70">
-            <span className="mr-1.5 text-primary">👉</span>Choisis la playlist
-            Spotify d’où seront importés les artistes qui formeront la base de
-            tes recherches. Ensuite, tu pourras décider, ou non, de creuser
-            certains de ces artistes pour t’en voir proposer d’autres
-            similaires, et cela ainsi de suite jusqu’à la découverte de ta
-            future pépite.
+            Choisis la playlist Spotify d’où seront importés les artistes qui
+            formeront la base de tes recherches. Ensuite, tu pourras décider, ou
+            non, de creuser certains de ces artistes pour t’en voir proposer
+            d’autres similaires, et cela ainsi de suite jusqu’à la découverte de
+            ta future pépite.
           </Text>
           <Text className="text-base text-primary/70">
             <span className="mr-1.5 text-primary">⚠️</span>Il est possible que
             tu arrives à court d’artistes. Tu pourras à tout moment en
             réimporter de nouveaux, mais cela uniquement depuis cette playlist.
-            Du coup, le choix de la playlist est{" "}
+            Du coup, le choix de ta playlist est{" "}
             <span className="underline">important</span> !
           </Text>
           {/* <span className="mr-1.5 text-primary">⚠️</span>Il est possible que

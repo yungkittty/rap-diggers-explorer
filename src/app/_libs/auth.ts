@@ -123,6 +123,7 @@ export const {
             fetchOptions,
           );
           if (response.status !== 200) {
+            console.log(response);
             return { error: "" };
           }
           data = await response.json();

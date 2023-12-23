@@ -12,16 +12,23 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { PropsWithChildren } from "react";
+import { ComponentType, PropsWithChildren } from "react";
+import { PickAxeDisIcon } from "../PickAxeDisIcon";
+import { PickAxeIcon } from "../PickAxeIcon";
 
 type ManualLineProps = PropsWithChildren & {
-  iconName: string;
+  iconName?: string;
+  iconComponent?: ComponentType<{ size?: "small" | "large" }>;
 };
 const ManualLine = (props: ManualLineProps) => {
-  const { iconName, children } = props;
+  const {
+    iconName,
+    iconComponent: IconComponent = () => null,
+    children,
+  } = props;
   return (
     <div className="flex flex-row items-center text-base text-primary">
-      <Icon name={iconName} filled />
+      {iconName ? <Icon name={iconName} filled /> : <IconComponent />}
       <Text className="mx-2.5">=</Text>
       <Text>{children}</Text>
     </div>
@@ -57,7 +64,7 @@ export const TopBarManualButton = () => {
         </DialogHeader>
         <div className="flex flex-col gap-1.5">
           {/* prettier-ignore */}
-          <ManualLine iconName="check">
+          <ManualLine iconComponent={PickAxeIcon}>
             Je <span className="italic mr-0.5">creuse</span> l’artiste seulement.
           </ManualLine>
           {/* prettier-ignore */}
@@ -69,7 +76,7 @@ export const TopBarManualButton = () => {
             Je passe l’artiste pour une durée de 6 mois.
           </ManualLine>
           {/* prettier-ignore */}
-          <ManualLine iconName="dislike"><ManualLine iconName="close">
+          <ManualLine iconName="dislike"><ManualLine iconComponent={PickAxeDisIcon}>
             Je passe l’artiste pour une durée de 1 an.
           </ManualLine></ManualLine>
           {/* prettier-ignore */}

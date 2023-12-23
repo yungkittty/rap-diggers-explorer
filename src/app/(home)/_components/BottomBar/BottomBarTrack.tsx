@@ -57,7 +57,7 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
               />
             ) : null}
           </div>
-          <div className="flex flex-col justify-around ml-3 min-w-0">
+          <div className="flex flex-col justify-between my-0.5 ml-3 min-w-0">
             {trackCurrent ? (
               <Text className="uppercase text-base text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
                 {trackCurrent.spotifyName}

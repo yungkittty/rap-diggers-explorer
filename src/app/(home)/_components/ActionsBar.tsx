@@ -9,14 +9,17 @@ import {
   PUT_ArtistStatusInput,
   PUT_ArtistStatusOutput,
 } from "@/app/_types/api";
-import { useContext } from "react";
+import { ComponentType, useContext, useState } from "react";
 import useSWRMutation from "swr/mutation";
 import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
+import { PickAxeDisIcon } from "./PickAxeDisIcon";
+import { PickAxeIcon } from "./PickAxeIcon";
 
 type ActionButtonProps = {
   className?: string;
   classNameIcon?: string;
-  iconName: string;
+  iconName?: string;
+  iconComponent?: ComponentType<{ size?: "small" | "large" }>;
   size?: "large" | "medium" | "small";
   onClick: () => void;
 };
@@ -26,6 +29,7 @@ const ActionButton = (props: ActionButtonProps) => {
     classNameIcon: _classNameIcon = "",
     size = "large",
     iconName,
+    iconComponent: IconComponent = () => null,
     onClick,
   } = props;
 
@@ -53,11 +57,15 @@ const ActionButton = (props: ActionButtonProps) => {
       )}
       onClick={onClick}
     >
-      <Icon
-        className={classNameIcon} //
-        name={iconName}
-        filled
-      />
+      {iconName ? (
+        <Icon
+          className={classNameIcon} //
+          name={iconName}
+          filled
+        />
+      ) : (
+        <IconComponent size="small" />
+      )}
     </Button>
   );
 };
@@ -88,17 +96,20 @@ export const ActionsBar = (props: ActionsBarProps) => {
 
   const { toast } = useToast();
   const artistStatusId = artistStatusCurrent?.id || null;
-  const { trigger, isMutating } = useSWRMutation(
+  const { trigger } = useSWRMutation(
     artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
     putArtistStatus,
   );
+  const [isDisabled, setIsDisabled] = useState(false);
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (!artistStatusId || isMutating) {
+      if (!artistStatusId || isDisabled) {
         return;
       }
       try {
+        setIsDisabled(true);
         const data = await trigger({ action });
+        setTimeout(() => setIsDisabled(false), 700);
         if (!data.error) {
           nextArtistStatus();
           return;
@@ -128,7 +139,8 @@ export const ActionsBar = (props: ActionsBarProps) => {
   return (
     <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center pb-12">
       <ActionButton
-        iconName="check" //
+        // iconName="check" //
+        iconComponent={PickAxeIcon}
         size="small"
         onClick={getHandleClick("dig-in")}
       />
@@ -148,7 +160,8 @@ export const ActionsBar = (props: ActionsBarProps) => {
         onClick={getHandleClick("dislike")}
       />
       <ActionButton
-        iconName="close" //
+        // iconName="close" //
+        iconComponent={PickAxeDisIcon}
         size="small"
         onClick={getHandleClick("dig-out")}
       />
