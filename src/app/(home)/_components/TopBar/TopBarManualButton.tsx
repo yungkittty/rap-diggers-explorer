@@ -13,7 +13,6 @@ import {
 } from "@/app/_components/ui/dialog";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { ComponentType, PropsWithChildren } from "react";
-import { PickAxeDisIcon } from "../PickAxeDisIcon";
 import { PickAxeIcon } from "../PickAxeIcon";
 
 type ManualLineProps = PropsWithChildren & {
@@ -62,10 +61,10 @@ export const TopBarManualButton = () => {
             <Heading>Manuel d’utilisation</Heading>
           </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 mt-1">
           {/* prettier-ignore */}
           <ManualLine iconComponent={PickAxeIcon}>
-            Je <span className="italic mr-0.5">creuse</span> l’artiste seulement.
+            Je <span className="italic mr-0.5">creuse</span> l’artiste.
           </ManualLine>
           {/* prettier-ignore */}
           <ManualLine iconName="heart">
@@ -76,7 +75,7 @@ export const TopBarManualButton = () => {
             Je passe l’artiste pour une durée de 6 mois.
           </ManualLine>
           {/* prettier-ignore */}
-          <ManualLine iconName="dislike"><ManualLine iconComponent={PickAxeDisIcon}>
+          <ManualLine iconName="dislike"><ManualLine iconName="close" /* iconComponent={PickAxeDisIcon} */>
             Je passe l’artiste pour une durée de 1 an.
           </ManualLine></ManualLine>
           {/* prettier-ignore */}
@@ -88,7 +87,7 @@ export const TopBarManualButton = () => {
             J’exporte les artistes sauvegardés depuis le dernier export.
           </ManualLine>
           {/* prettier-ignore */}
-          <Text className="mt-2 text-sm text-primary/50">
+          <Text className="mt-1.5 text-sm text-primary/50">
             <span className="italic">creuser</span><span className="mx-1.5">:</span>chercher les artistes similaires
           </Text>
         </div>

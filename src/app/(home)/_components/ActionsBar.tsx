@@ -9,10 +9,9 @@ import {
   PUT_ArtistStatusInput,
   PUT_ArtistStatusOutput,
 } from "@/app/_types/api";
-import { ComponentType, useContext, useState } from "react";
+import { ComponentType, useContext } from "react";
 import useSWRMutation from "swr/mutation";
 import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
-import { PickAxeDisIcon } from "./PickAxeDisIcon";
 import { PickAxeIcon } from "./PickAxeIcon";
 
 type ActionButtonProps = {
@@ -91,6 +90,7 @@ type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
   const {
     artistStatusCurrent, //
+    previousArtistStatus,
     nextArtistStatus,
   } = useContext(ArtistsStatusContext);
 
@@ -100,18 +100,15 @@ export const ActionsBar = (props: ActionsBarProps) => {
     artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
     putArtistStatus,
   );
-  const [isDisabled, setIsDisabled] = useState(false);
   const getHandleClick =
     (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (!artistStatusId || isDisabled) {
+      if (!artistStatusId) {
         return;
       }
       try {
-        setIsDisabled(true);
+        nextArtistStatus();
         const data = await trigger({ action });
-        setTimeout(() => setIsDisabled(false), 700);
         if (!data.error) {
-          nextArtistStatus();
           return;
         }
         switch (data.error) {
@@ -121,19 +118,20 @@ export const ActionsBar = (props: ActionsBarProps) => {
               title: "Erreur",
               description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
             });
-            return;
+            break;
           }
         }
       } catch (error) {
         if (process.env.VERCEL_ENV !== "production") {
           console.log(error);
         }
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+        });
       }
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-      });
+      previousArtistStatus();
     };
 
   return (
@@ -145,7 +143,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
         onClick={getHandleClick("dig-in")}
       />
       <ActionButton
-        classNameIcon="relative bottom-[-2px]"
+        classNameIcon="relative bottom-[-2px] left-[-1px]"
         iconName="heart"
         onClick={getHandleClick("like")}
       />
@@ -160,8 +158,8 @@ export const ActionsBar = (props: ActionsBarProps) => {
         onClick={getHandleClick("dislike")}
       />
       <ActionButton
-        // iconName="close" //
-        iconComponent={PickAxeDisIcon}
+        iconName="close" //
+        // iconComponent={PickAxeDisIcon}
         size="small"
         onClick={getHandleClick("dig-out")}
       />

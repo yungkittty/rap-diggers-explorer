@@ -55,7 +55,7 @@ export const TopBarImportButton = () => {
 
   const { toast } = useToast();
   const { trigger, isMutating } = useSWRMutation(
-    "/api/playlists/import", //
+    "/api/playlists/playlist", //
     postPlaylistsImport,
   );
   const handleClick = async () => {

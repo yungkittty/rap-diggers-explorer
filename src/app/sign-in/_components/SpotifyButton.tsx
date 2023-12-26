@@ -9,7 +9,7 @@ export const SpotifyButton = () => {
   const handleClick = async () => {
     await signIn(
       "spotify", //
-      { callbackUrl: "/import" },
+      { callbackUrl: "/playlist" },
     );
   };
   return (

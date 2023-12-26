@@ -37,10 +37,10 @@ export const withAuth = (Component: React.ComponentType<any>) => {
       },
     });
     if (!playlistStatus.length) {
-      if (pathname === "/import") {
+      if (pathname === "/playlist") {
         return <Component />;
       }
-      return redirect("/import");
+      return redirect("/playlist");
     }
 
     // Else, ...
