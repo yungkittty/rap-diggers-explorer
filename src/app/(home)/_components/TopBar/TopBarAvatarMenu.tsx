@@ -27,20 +27,26 @@ import {
 } from "@/app/_components/ui/dropdown-menu";
 import { useToast } from "@/app/_components/ui/use-toast";
 import { DELETE_UsersOuput } from "@/app/_types/api";
+import { CustomError } from "@/app/_utils/errors";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
 import useSWRMutation from "swr/mutation";
 
 const deleteUsers = async (url: string): Promise<DELETE_UsersOuput> => {
-  const fetchOptions: RequestInit = {
+  const options: RequestInit = {
     method: "DELETE",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 export const TopBarAvatarMenu = () => {
@@ -53,28 +59,33 @@ export const TopBarAvatarMenu = () => {
   };
 
   const router = useRouter();
+  const handleSuccess = () => {
+    router.replace("/sign-in");
+  };
+
   const { toast } = useToast();
-  const { trigger, isMutating } = useSWRMutation(
-    "/api/users", //
-    deleteUsers,
-  );
-  const handleDelete = async (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    try {
-      await trigger();
-      router.replace("/sign-in");
-      return;
-    } catch (error) {
-      console.log(error);
-      if (process.env.VERCEL_ENV !== "production") {
-        console.log(error);
-      }
-    }
+  const handleError = () => {
     toast({
       variant: "destructive",
       title: "Erreur",
       description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
     });
+  };
+
+  const configuration = {
+    throwOnError: false,
+    onSuccess: handleSuccess,
+    onError: handleError,
+  };
+  const { trigger, isMutating } = useSWRMutation(
+    "/api/users", //
+    deleteUsers,
+    configuration,
+  );
+
+  const handleDelete = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    await trigger();
   };
 
   const userImage = data?.user?.image || undefined;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ErrorCode } from "../_constants/error-code";
 
-type API_Ouput = {
+export type API_Ouput = {
   error?: ErrorCode | null;
 };
 
@@ -58,10 +58,13 @@ export const PUT_ArtistStatusInputSchema = z.object({
     z.literal("like"),
     z.literal("dislike"),
     z.literal("snooze"),
+    z.literal("skipped"),
   ]),
 });
 export type PUT_ArtistStatusInput = z.infer<typeof PUT_ArtistStatusInputSchema>;
-export type PUT_ArtistStatusOutput = API_Ouput & {};
+export type PUT_ArtistStatusOutput = API_Ouput & {
+  data?: string[];
+};
 
 //
 // API/GET - /api/artist-status/[artist-status-id]/tracks

@@ -94,7 +94,7 @@ export const POST = withRate(
           tx, //
           userId,
           spotifyArtistIds,
-          { isImported: true },
+          { importedAt: new Date() },
         );
       });
 

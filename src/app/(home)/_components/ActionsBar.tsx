@@ -9,9 +9,18 @@ import {
   PUT_ArtistStatusInput,
   PUT_ArtistStatusOutput,
 } from "@/app/_types/api";
+import { CustomError } from "@/app/_utils/errors";
 import { ComponentType, useContext } from "react";
 import useSWRMutation from "swr/mutation";
-import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
+import {
+  ArtistStatus,
+  ArtistsStatusContext,
+} from "../_contexts/ArtistStatusContext";
+import {
+  ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE,
+  ARTIST_CARDS_CAROUSEL_OFFSET,
+} from "./ArtistCardsCarousel";
+import { TracksContext } from "./BottomBar/_contexts/TracksContext";
 import { PickAxeIcon } from "./PickAxeIcon";
 
 type ActionButtonProps = {
@@ -73,7 +82,7 @@ const putArtistStatus = async (
   url: string,
   { arg: { action } }: { arg: PUT_ArtistStatusInput },
 ): Promise<PUT_ArtistStatusOutput> => {
-  const fetchOptions = {
+  const options: RequestInit = {
     method: "PUT",
     headers: {
       Accept: "application/json",
@@ -83,72 +92,163 @@ const putArtistStatus = async (
       action,
     }),
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 type ActionsBarProps = {};
 export const ActionsBar = (props: ActionsBarProps) => {
   const {
     artistStatusCurrent, //
+    artistStatusIndex,
+    setArtistStatus,
     previousArtistStatus,
     nextArtistStatus,
+    commitArtistStatus,
   } = useContext(ArtistsStatusContext);
 
-  const { toast } = useToast();
-  const artistStatusId = artistStatusCurrent?.id || null;
-  const { trigger } = useSWRMutation(
-    artistStatusId ? `/api/artist-status/${artistStatusId}` : null, //
-    putArtistStatus,
-  );
-  const getHandleClick =
-    (action: PUT_ArtistStatusInput["action"]) => async () => {
-      if (!artistStatusId) {
-        return;
+  const {
+    isLoading, //
+    trackCurrent,
+  } = useContext(TracksContext);
+
+  const handleSuccess = (data: PUT_ArtistStatusOutput) => {
+    commitArtistStatus();
+
+    const { data: artistStatusIds = [] } = data;
+    if (!artistStatusIds.length) {
+      return;
+    }
+
+    setArtistStatus((prevArtistStatus) => {
+      const nextArtistStatusPast = prevArtistStatus.slice(
+        0, //
+        artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET,
+      );
+      const nextArtistStatusImmutable = prevArtistStatus.slice(
+        artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET,
+        artistStatusIndex +
+          ARTIST_CARDS_CAROUSEL_OFFSET +
+          ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE,
+      );
+      const nextArtistStatusImmutableIds = nextArtistStatusImmutable.map(
+        (artistStatus) => (artistStatus ? artistStatus.id : null),
+      );
+      const prevArtistStatusFuture = prevArtistStatus.slice(
+        artistStatusIndex +
+          ARTIST_CARDS_CAROUSEL_OFFSET +
+          ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE,
+      );
+      const nextArtistStatusFutureIds = artistStatusIds.filter(
+        (artistStatusId) =>
+          !nextArtistStatusImmutableIds.includes(artistStatusId),
+      );
+
+      const nextArtistStatusFutureSwapped: ArtistStatus[] = [];
+      for (
+        let nextArtistStatusFutureIdIndex = 0;
+        nextArtistStatusFutureIdIndex < nextArtistStatusFutureIds.length;
+        nextArtistStatusFutureIdIndex += 1
+      ) {
+        const nextArtistStatusFutureId =
+          nextArtistStatusFutureIds[nextArtistStatusFutureIdIndex];
+        const nextArtistStatusFuture = prevArtistStatusFuture.find(
+          (artistStatus) => {
+            if (!artistStatus) {
+              return false;
+            }
+            return artistStatus.id === nextArtistStatusFutureId;
+          },
+        );
+        if (!nextArtistStatusFuture) {
+          break;
+        }
+
+        const prevArtistStatusFutureSwapped =
+          prevArtistStatusFuture[nextArtistStatusFutureIdIndex];
+        const nextArtistStatusFutureRenderId =
+          prevArtistStatusFutureSwapped?.renderId || window.crypto.randomUUID();
+
+        nextArtistStatusFutureSwapped.push({
+          ...nextArtistStatusFuture,
+          renderId: nextArtistStatusFutureRenderId,
+        });
       }
-      try {
-        nextArtistStatus();
-        const data = await trigger({ action });
-        if (!data.error) {
-          return;
-        }
-        switch (data.error) {
-          case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
-            toast({
-              variant: "destructive",
-              title: "Erreur",
-              description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
-            });
-            break;
-          }
-        }
-      } catch (error) {
-        if (process.env.VERCEL_ENV !== "production") {
-          console.log(error);
-        }
+
+      const nextArtistStatus = [
+        ...nextArtistStatusPast,
+        ...nextArtistStatusImmutable,
+        ...nextArtistStatusFutureSwapped,
+      ];
+      return nextArtistStatus;
+    });
+  };
+
+  const { toast } = useToast();
+  const handleError = (error: CustomError) => {
+    previousArtistStatus();
+
+    switch (error.code) {
+      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+        });
+        break;
+      }
+      default: {
         toast({
           variant: "destructive",
           title: "Erreur",
           description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
         });
+        break;
       }
-      previousArtistStatus();
+    }
+  };
+
+  const artistStatusId = artistStatusCurrent?.id || null;
+  const configuration = {
+    throwOnError: false,
+    onSuccess: handleSuccess,
+    onError: handleError,
+  };
+  const { trigger } = useSWRMutation(
+    artistStatusId ? `/api/artist-status/${artistStatusId}` : null,
+    putArtistStatus,
+    configuration,
+  );
+
+  const getHandleClick =
+    (action: PUT_ArtistStatusInput["action"]) => async () => {
+      if (!artistStatusId) {
+        return;
+      }
+      nextArtistStatus();
+      await trigger({
+        action: !isLoading && !trackCurrent ? "skipped" : action,
+      });
     };
 
   return (
     <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center pb-12">
       <ActionButton
-        // iconName="check" //
         iconComponent={PickAxeIcon}
         size="small"
         onClick={getHandleClick("dig-in")}
       />
       <ActionButton
-        classNameIcon="relative bottom-[-2px] left-[-1px]"
+        classNameIcon="relative bottom-[-2px] left-[-0.5px]"
         iconName="heart"
         onClick={getHandleClick("like")}
       />
       <ActionButton
-        iconName="time" //
+        iconName="time"
         size="medium"
         onClick={getHandleClick("snooze")}
       />
@@ -158,8 +258,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
         onClick={getHandleClick("dislike")}
       />
       <ActionButton
-        iconName="close" //
-        // iconComponent={PickAxeDisIcon}
+        iconName="close"
         size="small"
         onClick={getHandleClick("dig-out")}
       />

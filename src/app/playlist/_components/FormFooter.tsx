@@ -7,6 +7,7 @@ import type {
   POST_PlaylistsInput,
   POST_PlaylistsOutput,
 } from "@/app/_types/api";
+import { CustomError } from "@/app/_utils/errors";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useState } from "react";
 import useSWRMutation from "swr/mutation";
@@ -19,7 +20,7 @@ const postPlaylists = async (
   url: string, //
   { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsInput },
 ): Promise<POST_PlaylistsOutput> => {
-  const fetchOptions: RequestInit = {
+  const options: RequestInit = {
     method: "POST", //
     headers: {
       Accept: "application/json",
@@ -29,7 +30,12 @@ const postPlaylists = async (
       spotifyPlaylistId,
     }),
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 export const FormFooter = () => {
@@ -42,48 +48,55 @@ export const FormFooter = () => {
   );
 
   const router = useRouter();
+  const handleSuccess = () => {
+    router.replace("/");
+  };
+
   const { toast } = useToast();
+  const handleError = (error: CustomError) => {
+    switch (error.code) {
+      case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
+        toast({
+          title: "Erreur",
+          description: "Ta playlist contient plus de 1000 titres !",
+        });
+        break;
+      }
+      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+        });
+        break;
+      }
+      default: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+        });
+        break;
+      }
+    }
+  };
+
+  const configutation = {
+    throwOnError: false,
+    onSuccess: handleSuccess,
+    onError: handleError,
+  };
   const { trigger, isMutating } = useSWRMutation(
     "/api/playlists", //
     postPlaylists,
+    configutation,
   );
+
   const handleClick = async () => {
     if (!value || isMutating) {
       return;
     }
-    try {
-      const data = await trigger({ spotifyPlaylistId: value });
-      if (!data.error) {
-        router.replace("/");
-        return;
-      }
-      switch (data.error) {
-        case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
-          toast({
-            title: "Erreur",
-            description: "Ta playlist contient plus de 1000 titres !",
-          });
-          return;
-        }
-        case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
-          });
-          return;
-        }
-      }
-    } catch (error) {
-      if (process.env.VERCEL_ENV !== "production") {
-        console.log(error);
-      }
-    }
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-    });
+    await trigger({ spotifyPlaylistId: value });
   };
 
   const isDisabled = isMutating || !Boolean(value);

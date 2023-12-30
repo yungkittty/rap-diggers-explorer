@@ -6,6 +6,7 @@ import { ArtistsStatusContext } from "../_contexts/ArtistStatusContext";
 import { ArtistCard } from "./ArtistCard";
 
 export const ARTIST_CARDS_CAROUSEL_SIZE = 7;
+export const ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE = 1;
 export const ARTIST_CARDS_CAROUSEL_OFFSET = 3;
 
 type ArtistCardsCarouselProps = {};
@@ -63,10 +64,13 @@ export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
                   "left-[calc(50%-40cqh+((80cqh*0.75)+48px)*3)]": artistStatusIndex === 6, // prettier-ignore
                 },
               );
+
+              const artistCardRenderId =
+                artistStatus?.renderId || artistStatusIndex;
               return (
                 <ArtistCard
                   className={className}
-                  key={`artist-card-${artistStatus?.id || artistStatusIndex}`}
+                  key={`artist-card-${artistCardRenderId}`}
                   artist={artistStatus?.artist}
                   isLoading={!artistStatus}
                   isFocused={isFocused}

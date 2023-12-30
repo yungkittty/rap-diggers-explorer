@@ -7,6 +7,16 @@ import {
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
 import { withRate } from "@/app/_utils/rate";
+import {
+  GET_ARTIST_STATUS_DEFAULT_LIMIT,
+  GET_ARTIST_STATUS_DEFAULT_OFFSET,
+} from "../route";
+
+const PUT_ARTIST_STATUS_DUG_IN_WEIGHT = 1.5;
+const PUT_ARTIST_STATUS_DUG_OUT_WEIGHT = -8;
+const PUT_ARTIST_STATUS_LIKED_WEIGHT = 5;
+const PUT_ARTIST_STATUS_DISLIKED_WEIGHT = -1.5;
+const PUT_ARTIST_STATUS_SOONZED_WEIGHT = 2;
 
 export const PUT = withRate(
   { weight: 1 },
@@ -37,6 +47,7 @@ export const PUT = withRate(
       const artistStatus = await prisma.artistStatus.findUnique({
         select: {
           id: true,
+          batchId: true,
 
           // filters = all
           dugInAt: true,
@@ -44,6 +55,7 @@ export const PUT = withRate(
           likedAt: true,
           dislikedAt: true,
           snoozedAt: true,
+          skippedAt: true,
 
           artist: {
             select: {
@@ -67,7 +79,8 @@ export const PUT = withRate(
         artistStatus.dugOutAt ||
         artistStatus.likedAt ||
         artistStatus.dislikedAt ||
-        artistStatus.snoozedAt
+        artistStatus.snoozedAt ||
+        artistStatus.skippedAt
       ) {
         return Response.json(
           { error: ErrorCode.USER_FORBIDDEN },
@@ -82,9 +95,9 @@ export const PUT = withRate(
         try {
           const { artists: spotifyArtists } =
             await spotifyApi.artists.relatedArtists(spotifyArtistId);
-          spotifyArtistIds = spotifyArtists.map(
-            (spotifyArtist) => spotifyArtist.id,
-          );
+          spotifyArtistIds = spotifyArtists
+            .filter((spotifyArtist) => spotifyArtist.followers.total <= 50_000)
+            .map((spotifyArtist) => spotifyArtist.id);
         } catch (error) {
           console.log(error);
           return Response.json(
@@ -94,11 +107,86 @@ export const PUT = withRate(
         }
       }
 
+      let score: number | null = null;
+      if (artistStatus.batchId && action !== "skipped") {
+        const artistStatus_ = await prisma.artistStatus.findMany({
+          select: {
+            // filters = all - skipped
+            dugInAt: true,
+            dugOutAt: true,
+            likedAt: true,
+            dislikedAt: true,
+            snoozedAt: true,
+          },
+          where: {
+            batchId: artistStatus.batchId,
+
+            // filters = all - skipped
+            OR: [
+              { dugInAt: { not: null } },
+              { dugOutAt: { not: null } },
+              { likedAt: { not: null } },
+              { dislikedAt: { not: null } },
+              { snoozedAt: { not: null } },
+            ],
+          },
+        });
+
+        type ComputedFields =
+          | "dugInAt" //
+          | "dugOutAt"
+          | "likedAt"
+          | "dislikedAt"
+          | "snoozedAt";
+        const fieldsToActionsMap: { [key in ComputedFields]: typeof action } = {
+          dugInAt: "dig-in",
+          dugOutAt: "dig-out",
+          likedAt: "like",
+          dislikedAt: "dislike",
+          snoozedAt: "snooze",
+        };
+        const computeFieldRatio = (artistStatusField: ComputedFields) => 
+          (artistStatus_.filter((artistStatus) => artistStatus[artistStatusField] !== null).length + +(fieldsToActionsMap[artistStatusField] === action)) / (artistStatus_.length + 1); // prettier-ignore
+
+        const dugInRatio = computeFieldRatio("dugInAt");
+        const dugOutRatio = computeFieldRatio("dugOutAt");
+        const likedRatio = computeFieldRatio("likedAt");
+        const dislikedRatio = computeFieldRatio("dislikedAt");
+        const snoozedRatio = computeFieldRatio("snoozedAt");
+        if (process.env.NODE_ENV !== "production") {
+          console.log(artistStatus.batchId, {
+            "dug-in ratio": dugInRatio,
+            "dug-out ratio": dugOutRatio,
+            "liked ratio": likedRatio,
+            "disliked ratio": dislikedRatio,
+            "snoozed ratio": snoozedRatio,
+          });
+        }
+
+        // prettier-ignore
+        score = (
+          dugInRatio     * PUT_ARTIST_STATUS_DUG_IN_WEIGHT +
+          dugOutRatio    * PUT_ARTIST_STATUS_DUG_OUT_WEIGHT +
+          likedRatio     * PUT_ARTIST_STATUS_LIKED_WEIGHT +
+          dislikedRatio  * PUT_ARTIST_STATUS_DISLIKED_WEIGHT +
+          snoozedRatio   * PUT_ARTIST_STATUS_SOONZED_WEIGHT
+        ) / 5;
+        score = Math.round((score + Number.EPSILON) * 100) / 100;
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            artistStatus.batchId, //
+            { score },
+          );
+        }
+      }
+
       await prisma.$transaction(async (tx) => {
+        const batchId = crypto.randomUUID();
         await upsertArtistStatus(
           tx, //
           userId,
           spotifyArtistIds,
+          { batchId, score: 0 },
         );
 
         await tx.artistStatus.update({
@@ -108,15 +196,54 @@ export const PUT = withRate(
             likedAt: action === "like" ? new Date() : null,
             dislikedAt: action === "dislike" ? new Date() : null,
             snoozedAt: action === "snooze" ? new Date() : null,
+            skippedAt: action === "skipped" ? new Date() : null,
           },
           where: {
             id: artistStatus.id,
           },
         });
+
+        if (score !== null) {
+          await tx.artistStatus.updateMany({
+            data: {
+              score,
+            },
+            where: {
+              batchId: artistStatus.batchId,
+            },
+          });
+        }
       });
 
+      const artistStatus_ = await prisma.artistStatus.findMany({
+        select: {
+          id: true,
+        },
+        where: {
+          userId,
+
+          // filters = all
+          dugInAt: null,
+          dugOutAt: null,
+          likedAt: null,
+          dislikedAt: null,
+          snoozedAt: null,
+          skippedAt: null,
+        },
+        orderBy: [
+          { score: { sort: "desc", nulls: "first" } },
+          { createdAt: "asc" },
+          { artist: { spotifyId: "asc" } },
+        ],
+        skip: GET_ARTIST_STATUS_DEFAULT_OFFSET,
+        take: GET_ARTIST_STATUS_DEFAULT_LIMIT,
+      });
+      const artistStatusIds = artistStatus_.map(
+        (artistStatus) => artistStatus.id,
+      );
+
       return Response.json(
-        {}, //
+        { data: artistStatusIds }, //
         { status: 200 },
       );
     },

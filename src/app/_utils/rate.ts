@@ -4,7 +4,7 @@ import { ErrorCode } from "../_constants/error-code";
 
 const RATE_LIMIT_REDIS_KEY = "6eCo0bfzRgWeoK9pFt7v48yAKWHDWBVp";
 const RATE_LIMIT_WINDOW_SIZE = 30_000; // milliseconds
-const RATE_LIMIT_MAX_REQUESTS = 75;
+const RATE_LIMIT_MAX_REQUESTS = 65;
 
 const kv = createClient({
   url: process.env.KV_REST_API_URL ?? "",

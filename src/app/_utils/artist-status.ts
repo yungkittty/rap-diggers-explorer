@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { ArtistStatus, PrismaClient } from "@prisma/client";
 
 export const upsertArtistStatus = async (
   tx: Omit<
@@ -12,7 +12,7 @@ export const upsertArtistStatus = async (
   >,
   userId: string,
   spotifyArtistIds: string[],
-  options: { isImported: boolean } = { isImported: false },
+  artistStatus: Partial<ArtistStatus> = {},
 ): Promise<void> => {
   for (const spotifyArtistId of spotifyArtistIds) {
     const { id: artistId } = await tx.artist.upsert({
@@ -33,9 +33,9 @@ export const upsertArtistStatus = async (
         },
       },
       create: {
+        ...artistStatus,
         userId,
         artistId,
-        importedAt: options.isImported ? new Date() : null,
       },
       update: {},
     });

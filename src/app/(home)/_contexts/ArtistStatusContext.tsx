@@ -6,149 +6,173 @@ import type {
   GET_ArtistStatusOuput,
   GET_ArtistStatusOuputDataItem,
 } from "@/app/_types/api";
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import { CustomError } from "@/app/_utils/errors";
+import React, {
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { SWRConfiguration } from "swr";
 import useSWRImmutable from "swr/immutable";
 import {
+  ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE,
   ARTIST_CARDS_CAROUSEL_OFFSET,
   ARTIST_CARDS_CAROUSEL_SIZE,
 } from "../_components/ArtistCardsCarousel";
 
-const getArtistStatus = async ([url]: [string, number]): //
+const getArtistStatus = async ([url]: [string, string]): //
 Promise<GET_ArtistStatusOuput> => {
-  const fetchOptions = {
+  const options: RequestInit = {
     method: "GET",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
+export type ArtistStatus =
+  | (GET_ArtistStatusOuputDataItem & { renderId?: string })
+  | null;
 export const ArtistsStatusContext = React.createContext<{
   isInitialLoading: boolean;
-  artistStatusCurrent: GET_ArtistStatusOuputDataItem | null;
-  artistStatusNext: GET_ArtistStatusOuputDataItem | null;
+  artistStatusCurrent: ArtistStatus;
+  artistStatusNext: ArtistStatus;
   artistStatusIndex: number;
-  artistStatus: (GET_ArtistStatusOuputDataItem | null)[];
+  artistStatus: ArtistStatus[];
+  setArtistStatus: Dispatch<SetStateAction<ArtistStatus[]>>;
   previousArtistStatus: () => void;
   nextArtistStatus: () => void;
+  commitArtistStatus: () => void;
 }>({
   isInitialLoading: true,
   artistStatusCurrent: null,
   artistStatusNext: null,
   artistStatusIndex: 0,
   artistStatus: [],
+  setArtistStatus: () => {},
   previousArtistStatus: () => {},
   nextArtistStatus: () => {},
+  commitArtistStatus: () => {},
 });
-
-const ARTIST_CARDS_CAROUSEL_FETCH_SIZE = 50; // = spotify max
 
 export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
   const [artistStatusIndex, setArtistStatusIndex] = useState(0);
-  const [artistStatus, setArtistStatus] = useState<
-    (GET_ArtistStatusOuputDataItem | null)[]
-  >(Array(ARTIST_CARDS_CAROUSEL_SIZE).fill(null));
+  const [artistStatus, setArtistStatus] = //
+    useState<ArtistStatus[]>(Array(ARTIST_CARDS_CAROUSEL_SIZE).fill(null));
 
   const artistStatusCurrentIndex =
     artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET;
-  const artistStatusCurrent: GET_ArtistStatusOuputDataItem | null =
+  const artistStatusCurrent: ArtistStatus =
     artistStatus[artistStatusCurrentIndex] || null;
-  const artistStatusNext: GET_ArtistStatusOuputDataItem | null =
+  const artistStatusNext: ArtistStatus =
     artistStatus[artistStatusCurrentIndex + 1] || null;
 
-  const { toast } = useToast();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const handleError = () => {
-    setIsInitialLoading(false);
-    setIsLoading(false);
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-    });
-    return;
-  };
+
   const handleSuccess = (data: GET_ArtistStatusOuput) => {
-    if (data.error) {
-      setIsInitialLoading(false);
-      setIsLoading(false);
-      switch (data.error) {
-        case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
-          });
-          return;
-        }
-        default: {
-          handleError();
-          return;
-        }
-      }
-    }
+    const { data: artistStatus = [] } = data;
+    setArtistStatus((prevArtistStatus) => {
+      const nextArtistStatusPast = prevArtistStatus.slice(
+        0, //
+        artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET,
+      );
+      const nextArtistStatusImmutable = prevArtistStatus.slice(
+        artistStatusIndex + ARTIST_CARDS_CAROUSEL_OFFSET,
+        artistStatusIndex +
+          ARTIST_CARDS_CAROUSEL_OFFSET +
+          (!isInitialLoading ? ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE : 0),
+      );
+      const nextArtistStatusImmutableIds = nextArtistStatusImmutable.map(
+        (artistStatus) => (artistStatus ? artistStatus.id : null),
+      );
+      const prevArtistStatusFuture = prevArtistStatus.slice(
+        artistStatusIndex +
+          ARTIST_CARDS_CAROUSEL_OFFSET +
+          ARTIST_CARDS_CAROUSEL_IMMUTABLE_SIZE,
+      );
+      const nextArtistStatusFuture = artistStatus.filter(
+        (artistStatus) =>
+          !nextArtistStatusImmutableIds.includes(artistStatus.id),
+      );
 
-    const { data: loadedArtistStatus = [] } = data;
-    setArtistStatus((previousArtistStatus) => {
-      let nextArtistStatus = [...previousArtistStatus];
+      const nextArtistStatusFutureSwapped: ArtistStatus[] = [];
+      for (
+        let nextArtistStatusFutureIndex = 0;
+        nextArtistStatusFutureIndex < nextArtistStatusFuture.length;
+        nextArtistStatusFutureIndex += 1
+      ) {
+        const nextArtistStatusFuture_ =
+          nextArtistStatusFuture[nextArtistStatusFutureIndex];
 
-      if (isInitialLoading) {
-        nextArtistStatus = nextArtistStatus.slice(
-          0, //
-          ARTIST_CARDS_CAROUSEL_OFFSET,
-        );
-      }
+        const prevArtistStatusFuture_ =
+          prevArtistStatusFuture[nextArtistStatusFutureIndex];
+        const nextArtistStatusFutureRenderId =
+          prevArtistStatusFuture_?.renderId || window.crypto.randomUUID();
 
-      const loadedArtistStatus_ = loadedArtistStatus[0];
-      if (loadedArtistStatus_) {
-        const duplicatedArtistStatusIndex = nextArtistStatus.findIndex(
-          (nextArtistStatus_) => {
-            if (!nextArtistStatus_) {
-              return false;
-            }
-            return nextArtistStatus_.id === loadedArtistStatus_.id;
-          },
-        );
-        if (duplicatedArtistStatusIndex > 0) {
-          nextArtistStatus = nextArtistStatus.slice(
-            0, //
-            duplicatedArtistStatusIndex,
-          );
-        }
+        nextArtistStatusFutureSwapped.push({
+          ...nextArtistStatusFuture_,
+          renderId: nextArtistStatusFutureRenderId,
+        });
       }
 
-      nextArtistStatus = [...nextArtistStatus, ...loadedArtistStatus];
+      const nextArtistStatus = [
+        ...nextArtistStatusPast,
+        ...nextArtistStatusImmutable,
+        ...nextArtistStatusFutureSwapped,
+      ];
       return nextArtistStatus;
     });
     setIsInitialLoading(false);
     setIsLoading(false);
   };
 
-  const [
-    [offset, offsetId], //
-    setOffset,
-  ] = useState<[number, string | null]>([0, null]);
-  const url =
-    "/api/artist-status?" +
-    new URLSearchParams({
-      offset: String(offset),
-      limit: String(ARTIST_CARDS_CAROUSEL_FETCH_SIZE),
-    }).toString();
-  const swrOptions: SWRConfiguration = {
+  const { toast } = useToast();
+  const handleError = (error: CustomError) => {
+    switch (error.code) {
+      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+        });
+        break;
+      }
+      default: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+        });
+        break;
+      }
+    }
+    setIsInitialLoading(false);
+    setIsLoading(false);
+  };
+
+  const [fetchId, setFetchId] = useState<string | null>(null);
+  const configuration: SWRConfiguration = {
+    shouldRetryOnError: false,
     onSuccess: handleSuccess,
     onError: handleError,
-    shouldRetryOnError: false,
   };
   useSWRImmutable(
-    [url, offsetId], //
+    ["/api/artist-status", fetchId], //
     getArtistStatus,
-    swrOptions,
+    configuration,
   );
 
+  const [isCommiting, setIsCommiting] = useState(false);
   const previousArtistStatus = () => {
     if (isInitialLoading) {
       return;
@@ -156,18 +180,33 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
     setArtistStatusIndex((previousArtistStatusIndex) => {
       return previousArtistStatusIndex - 1;
     });
+    setIsCommiting(false);
   };
   const nextArtistStatus = () => {
     if (isInitialLoading) {
       return;
     }
+    setIsCommiting(true);
     setArtistStatusIndex((previousArtistStatusIndex) => {
       return previousArtistStatusIndex + 1;
     });
   };
+  const commitArtistStatus = () => {
+    if (isInitialLoading) {
+      return;
+    }
+    setArtistStatus((previousArtistStatus) => {
+      const [, ...nextArtistStatus] = previousArtistStatus;
+      return nextArtistStatus;
+    });
+    setArtistStatusIndex((previousArtistStatusIndex) => {
+      return previousArtistStatusIndex - 1;
+    });
+    setIsCommiting(false);
+  };
   useEffect(
     () => {
-      if (isLoading) {
+      if (isLoading || isCommiting) {
         return;
       }
       /* prettier-ignore */
@@ -175,9 +214,8 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
         return;
       }
       setIsLoading(true);
-      const nextOffset = artistStatus.slice(artistStatusCurrentIndex).length;
-      const nextOffsetId = artistStatus.at(-1)!.id;
-      setOffset([nextOffset, nextOffsetId]);
+      const nextFetchId = window.crypto.randomUUID();
+      setFetchId(nextFetchId);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [artistStatusIndex],
@@ -192,8 +230,10 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
         artistStatusNext,
         artistStatusIndex,
         artistStatus,
+        setArtistStatus,
         previousArtistStatus,
         nextArtistStatus,
+        commitArtistStatus,
       }}
     />
   );

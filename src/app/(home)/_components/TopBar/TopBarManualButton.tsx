@@ -62,34 +62,27 @@ export const TopBarManualButton = () => {
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-1.5 mt-1">
-          {/* prettier-ignore */}
           <ManualLine iconComponent={PickAxeIcon}>
-            Je <span className="italic mr-0.5">creuse</span> l’artiste.
+            Je connais et j’aime l’artiste.
           </ManualLine>
-          {/* prettier-ignore */}
           <ManualLine iconName="heart">
-            Je <span className="italic mr-0.5">creuse</span> l’artiste et le sauvegarde pour l’export.
+            Je connais pas mais j’aime l’artiste.
           </ManualLine>
-          {/* prettier-ignore */}
           <ManualLine iconName="time">
-            Je passe l’artiste pour une durée de 6 mois.
+            Je connais pas et je passe l’artiste pour 6 mois.
           </ManualLine>
-          {/* prettier-ignore */}
-          <ManualLine iconName="dislike"><ManualLine iconName="close" /* iconComponent={PickAxeDisIcon} */>
-            Je passe l’artiste pour une durée de 1 an.
-          </ManualLine></ManualLine>
-          {/* prettier-ignore */}
+          <ManualLine iconName="dislike">
+            Je connais pas et je passe l’artiste pour 1 an.
+          </ManualLine>
+          <ManualLine iconName="close">
+            Je connais mais je passe l’artiste pour 1 an.
+          </ManualLine>
           <ManualLine iconName="loop-left">
             J’importe les nouveaux artistes de ma playlist.
           </ManualLine>
-          {/* prettier-ignore */}
           <ManualLine iconName="download">
-            J’exporte les artistes sauvegardés depuis le dernier export.
+            J’exporte les artistes aimés depuis le dernier export.
           </ManualLine>
-          {/* prettier-ignore */}
-          <Text className="mt-1.5 text-sm text-primary/50">
-            <span className="italic">creuser</span><span className="mx-1.5">:</span>chercher les artistes similaires
-          </Text>
         </div>
       </DialogContent>
     </Dialog>

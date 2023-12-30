@@ -13,6 +13,7 @@ export const Image = (props: ImageProps) => {
         className,
       )}
       draggable={false}
+      unoptimized
       {...others}
     />
   );

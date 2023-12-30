@@ -16,33 +16,44 @@ import {
   GET_PlaylistsIsImportableOutput,
   POST_PlaylistsImportOutput,
 } from "@/app/_types/api";
+import { CustomError } from "@/app/_utils/errors";
 import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
 
 const getPlaylistsIsImportable = async (
   url: string,
 ): Promise<GET_PlaylistsIsImportableOutput> => {
-  const fetchOptions: RequestInit = {
+  const options: RequestInit = {
     method: "GET",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 const postPlaylistsImport = async (
   url: string,
 ): Promise<POST_PlaylistsImportOutput> => {
-  const fetchOptions: RequestInit = {
+  const options: RequestInit = {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 export const TopBarImportButton = () => {
@@ -54,51 +65,59 @@ export const TopBarImportButton = () => {
   const isImportable = data?.isImportable;
 
   const { toast } = useToast();
+
+  const handleSuccess = () => {
+    toast({
+      title: "Succès 🚀",
+      description: "Tes nouveaux artistes ont été importés !",
+    });
+    return;
+  };
+
+  const handleError = (error: CustomError) => {
+    switch (error.code) {
+      case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
+        toast({
+          title: "Erreur",
+          description: "Ta playlist contient plus de 1000 titres !",
+        });
+        break;
+      }
+      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+        });
+        break;
+      }
+      default: {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
+        });
+        break;
+      }
+    }
+  };
+
+  const configuration = {
+    throwOnError: false,
+    onSuccess: handleSuccess,
+    onError: handleError,
+  };
   const { trigger, isMutating } = useSWRMutation(
     "/api/playlists/playlist", //
     postPlaylistsImport,
+    configuration,
   );
   const handleClick = async () => {
     if (isImportable !== true || isMutating) {
       return;
     }
-    try {
-      const data = await trigger();
-      if (!data.error) {
-        await mutate({ isImportable: false });
-        toast({
-          title: "Succès 🚀",
-          description: "Tes nouveaux artistes ont été importés !",
-        });
-        return;
-      }
-      switch (data.error) {
-        case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
-          toast({
-            title: "Erreur",
-            description: "Ta playlist contient plus de 1000 titres !",
-          });
-          return;
-        }
-        case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
-          toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
-          });
-          return;
-        }
-      }
-    } catch (error) {
-      if (process.env.VERCEL_ENV !== "production") {
-        console.log(error);
-      }
-    }
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-    });
+    await trigger();
+    await mutate({ isImportable: false });
   };
 
   const isDisabled = isImportable !== true;

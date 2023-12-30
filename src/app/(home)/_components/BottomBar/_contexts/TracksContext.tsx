@@ -1,12 +1,11 @@
 "use client";
 
 import { ArtistsStatusContext } from "@/app/(home)/_contexts/ArtistStatusContext";
-import { useToast } from "@/app/_components/ui/use-toast";
-import { ErrorCode } from "@/app/_constants/error-code";
 import {
   GET_ArtistStatusTracksOutput,
   GET_ArtistStatusTracksOutputDataItem,
 } from "@/app/_types/api";
+import { CustomError } from "@/app/_utils/errors";
 import React, {
   ChangeEvent,
   Dispatch,
@@ -20,17 +19,25 @@ import React, {
 import { SWRConfiguration } from "swr";
 import useSWRImmutable from "swr/immutable";
 
+const TRACKS_RETRY_INTERVAL = 3500; // ms
+const TRACKS_RETRY_COUNT = 2;
+
 const getArtistStatusTracks = async (
   url: string,
 ): Promise<GET_ArtistStatusTracksOutput> => {
-  const fetchOptions = {
+  const options: RequestInit = {
     method: "GET",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return fetch(url, fetchOptions).then((response) => response.json());
+  const response = await fetch(url, options);
+  const data = await response.json();
+  if (data.error !== undefined) {
+    throw new CustomError(data.error);
+  }
+  return data;
 };
 
 type TrackCurrentMetadata = {
@@ -72,60 +79,33 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const { artistStatusCurrent, artistStatusNext } =
-    useContext(ArtistsStatusContext);
+  const {
+    artistStatusCurrent, //
+    artistStatusNext,
+  } = useContext(ArtistsStatusContext);
 
-  const { toast } = useToast();
-  const handleError = () => {
-    toast({
-      variant: "destructive",
-      title: "Erreur",
-      description: "Une erreur inconnue est survenu. Réessaie plus tard ou contacte-nous directement si le problème persiste.", // prettier-ignore
-    });
-    return;
-  };
-  const handleSuccess = (data: GET_ArtistStatusTracksOutput) => {
-    if (!data.error) {
-      return;
-    }
-    switch (data.error) {
-      case ErrorCode.USER_FORBIDDEN_MAX_REQUESTS: {
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
-        });
-        return;
-      }
-      default: {
-        handleError();
-        return;
-      }
-    }
-  };
-
-  const swrOptions: SWRConfiguration<GET_ArtistStatusTracksOutput> = {
-    onSuccess: handleSuccess,
-    onError: handleError,
-    shouldRetryOnError: false,
+  let configuration: SWRConfiguration = {
+    shouldRetryOnError: true,
+    errorRetryInterval: TRACKS_RETRY_INTERVAL,
+    errorRetryCount: TRACKS_RETRY_COUNT,
   };
   let artistStatusId = artistStatusCurrent?.id || null;
   const { data, isLoading: isLoading_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
-    swrOptions,
+    configuration,
   );
   artistStatusId = artistStatusNext?.id || null;
   const { data: data_ } = useSWRImmutable(
     artistStatusId ? `/api/artist-status/${artistStatusId}/tracks` : null, //
     getArtistStatusTracks,
-    { shouldRetryOnError: false },
+    configuration,
   );
 
   const [trackIndex, setTrackIndex] = useState(0);
   const tracks: GET_ArtistStatusTracksOutputDataItem[] = data?.data || [];
   const trackCurrent: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex] || null; // prettier-ignore
-  const trackNext: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex + 1] || null; // prettier-ignore
+  const trackNext: GET_ArtistStatusTracksOutputDataItem | null = tracks[trackIndex+1] || null; // prettier-ignore
   const nextTracks: GET_ArtistStatusTracksOutputDataItem[] = data_?.data || [];
   const nextTrackCurrent = nextTracks[0] || null;
 
@@ -248,7 +228,7 @@ export const TracksContextProvider = (props: PropsWithChildren) => {
   return (
     <TracksContext.Provider
       value={{
-        isLoading: isLoading_ || isLoading,
+        isLoading: isLoading_,
         isPlaying,
         isSeeking,
         setIsSeeking,

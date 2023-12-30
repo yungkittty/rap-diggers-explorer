@@ -5,9 +5,8 @@ import { withAuth } from "@/app/_utils/auth";
 import { withRate } from "@/app/_utils/rate";
 import { Artist } from "@spotify/web-api-ts-sdk";
 
-const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
-const GET_ARTIST_STATUS_DEFAULT_LIMIT = 10;
-const GET_ARTIST_STATUS_MAX_LIMIT = 50;
+export const GET_ARTIST_STATUS_DEFAULT_OFFSET = 0;
+export const GET_ARTIST_STATUS_DEFAULT_LIMIT = 25;
 
 export const GET = withRate(
   { weight: 1 },
@@ -18,18 +17,6 @@ export const GET = withRate(
       userId,
       spotifyApi,
     ) => {
-      const searchParams = request.nextUrl.searchParams;
-      // const filters = "all";
-      const offset = Number(searchParams.get("offset")) || GET_ARTIST_STATUS_DEFAULT_OFFSET; // prettier-ignore
-      const limit = Number(searchParams.get("limit")) || GET_ARTIST_STATUS_DEFAULT_LIMIT; // prettier-ignore
-      // https://developer.spotify.com/documentation/web-api/reference/get-multiple-artists
-      if (limit > GET_ARTIST_STATUS_MAX_LIMIT) {
-        return Response.json(
-          { error: ErrorCode.INPUT_INVALID }, //
-          { status: 400 },
-        );
-      }
-
       const artistStatus = await prisma.artistStatus.findMany({
         select: {
           id: true,
@@ -48,13 +35,15 @@ export const GET = withRate(
           likedAt: null,
           dislikedAt: null,
           snoozedAt: null,
+          skippedAt: null,
         },
         orderBy: [
+          { score: { sort: "desc", nulls: "first" } },
           { createdAt: "asc" }, //
           { artist: { spotifyId: "asc" } },
         ],
-        skip: offset,
-        take: limit,
+        skip: GET_ARTIST_STATUS_DEFAULT_OFFSET,
+        take: GET_ARTIST_STATUS_DEFAULT_LIMIT,
       });
       if (!artistStatus.length) {
         return Response.json(
