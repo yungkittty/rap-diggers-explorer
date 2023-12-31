@@ -66,7 +66,7 @@ export const TopBarManualButton = () => {
             Je connais et j’aime l’artiste.
           </ManualLine>
           <ManualLine iconName="heart">
-            Je connais pas mais j’aime l’artiste.
+            Je connais pas et j’aime l’artiste.
           </ManualLine>
           <ManualLine iconName="time">
             Je connais pas et je passe l’artiste pour 6 mois.
@@ -75,7 +75,7 @@ export const TopBarManualButton = () => {
             Je connais pas et je passe l’artiste pour 1 an.
           </ManualLine>
           <ManualLine iconName="close">
-            Je connais mais je passe l’artiste pour 1 an.
+            Je connais et je passe l’artiste pour 1 an.
           </ManualLine>
           <ManualLine iconName="loop-left">
             J’importe les nouveaux artistes de ma playlist.

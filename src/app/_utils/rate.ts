@@ -7,8 +7,8 @@ const RATE_LIMIT_WINDOW_SIZE = 30_000; // milliseconds
 const RATE_LIMIT_MAX_REQUESTS = 65;
 
 const kv = createClient({
-  url: process.env.KV_REST_API_URL ?? "",
-  token: process.env.KV_REST_API_TOKEN ?? "",
+  url: process.env.UPSTASH_REST_API_URL ?? "",
+  token: process.env.UPSTASH_REST_API_TOKEN ?? "",
 });
 
 export const withRate =
