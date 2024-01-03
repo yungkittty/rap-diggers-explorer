@@ -110,7 +110,8 @@ model PlaylistStatus {
 model ArtistStatus {
   id String @id @default(cuid())
 
-  batchId String?
+  parentId String?
+  batchId  String?
 
   dugInAt    DateTime?
   dugOutAt   DateTime?
@@ -133,4 +134,6 @@ model ArtistStatus {
   artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId])
+  @@index([batchId])
+  @@index([userId])
 }

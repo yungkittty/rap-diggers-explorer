@@ -181,12 +181,13 @@ export const PUT = withRate(
       }
 
       await prisma.$transaction(async (tx) => {
+        const parentId = artistStatus.id;
         const batchId = crypto.randomUUID();
         await upsertArtistStatus(
           tx, //
           userId,
           spotifyArtistIds,
-          { batchId, score: 0 },
+          { parentId, batchId, score: 0 },
         );
 
         await tx.artistStatus.update({
@@ -238,6 +239,39 @@ export const PUT = withRate(
         skip: GET_ARTIST_STATUS_DEFAULT_OFFSET,
         take: GET_ARTIST_STATUS_DEFAULT_LIMIT,
       });
+      /* const artistStatus_ = await prisma.$queryRaw<{ id: string }[]>`
+        SELECT as2.id
+        FROM "ArtistStatus" as2
+        LEFT JOIN LATERAL
+          (SELECT COUNT(as3."dugInAt") / COUNT(as3.id)::float AS "dugInRatio",
+                  COUNT(as3."dugOutAt") / COUNT(as3.id)::float AS "dugOutRatio",
+                  COUNT(as3."likedAt") / COUNT(as3.id)::float AS "likedRatio",
+                  COUNT(as3."dislikedAt") / COUNT(as3.id)::float AS "dislikedRatio",
+                  COUNT(as3."snoozedAt") / COUNT(as3.id)::float AS "snoozedRatio",
+                  COUNT(as3."skippedAt") / COUNT(as3.id)::float AS "skippedRatio"
+          FROM "ArtistStatus" as3
+          WHERE as3."userId" = as2."userId"
+            AND as3."batchId" IS NOT DISTINCT FROM as2."batchId") AS ratios ON TRUE
+        WHERE as2."userId" = ${userId}
+          -- filter = all
+          AND as2."dugInAt" IS NULL
+          AND as2."dugOutAt" IS NULL
+          AND as2."likedAt" IS NULL
+          AND as2."dislikedAt" IS NULL
+          AND as2."snoozedAt" IS NULL
+          AND as2."skippedAt" IS NULL
+        ORDER BY CASE WHEN as2."batchId" IS NULL THEN 0 ELSE 1 END, 
+          ratios."likedRatio" DESC,
+          ratios."dugInRatio" DESC,
+          ratios."snoozedRatio" DESC,
+          ratios."dislikedRatio" DESC,
+          ratios."dugOutRatio" DESC,
+          ratios."skippedRatio" DESC,
+          as2."createdAt",
+          as2.id
+        LIMIT ${GET_ARTIST_STATUS_DEFAULT_LIMIT}
+        OFFSET ${GET_ARTIST_STATUS_DEFAULT_OFFSET};
+      `; */
       const artistStatusIds = artistStatus_.map(
         (artistStatus) => artistStatus.id,
       );
