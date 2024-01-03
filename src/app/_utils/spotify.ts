@@ -60,3 +60,21 @@ export const getSpotifyPlaylistArtistIds = async (
   const spotifyArtistIds = Array.from(spotifyArtistIdsSet);
   return spotifyArtistIds;
 };
+
+export const getSpotifyArtistRelatedIds = async (
+  spotifyApi: SpotifyApi,
+  spotifyArtistId: string,
+): Promise<string[]> => {
+  let spotifyArtistIds: string[] = [];
+  try {
+    const { artists: spotifyArtists } =
+      await spotifyApi.artists.relatedArtists(spotifyArtistId);
+    spotifyArtistIds = spotifyArtists
+      .filter((spotifyArtist) => spotifyArtist.followers.total <= 50_000)
+      .map((spotifyArtist) => spotifyArtist.id);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+  return spotifyArtistIds;
+};

@@ -7,6 +7,7 @@ import {
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
 import { withRate } from "@/app/_utils/rate";
+import { getSpotifyArtistRelatedIds } from "@/app/_utils/spotify";
 import {
   GET_ARTIST_STATUS_DEFAULT_LIMIT,
   GET_ARTIST_STATUS_DEFAULT_OFFSET,
@@ -93,11 +94,10 @@ export const PUT = withRate(
       let spotifyArtistIds: string[] = [];
       if (action === "dig-in" || action === "like") {
         try {
-          const { artists: spotifyArtists } =
-            await spotifyApi.artists.relatedArtists(spotifyArtistId);
-          spotifyArtistIds = spotifyArtists
-            .filter((spotifyArtist) => spotifyArtist.followers.total <= 50_000)
-            .map((spotifyArtist) => spotifyArtist.id);
+          spotifyArtistIds = await getSpotifyArtistRelatedIds(
+            spotifyApi, //
+            spotifyArtistId,
+          );
         } catch (error) {
           console.log(error);
           return Response.json(
