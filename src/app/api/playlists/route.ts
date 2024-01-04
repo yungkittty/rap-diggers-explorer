@@ -22,7 +22,7 @@ export const preloadRelatedIds = async (
   spotifyArtistIds: string[],
 ): Promise<string[][]> => {
   const [
-    firstSpotifyArtistIdsBatch = [], //
+    firstSpotifyArtistIdsBatch = [], ////
     secondSpotifyArtistIdsBatch = [],
     thirdSpotifyArtistIdsBatch = [],
     ...othersSpotifyArtistIdsBatchs
