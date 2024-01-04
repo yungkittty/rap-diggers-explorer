@@ -2,14 +2,76 @@ import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
 import type { POST_PlaylistsInput } from "@/app/_types/api";
 import { POST_PlaylistsInputSchema } from "@/app/_types/api";
+import { getBatchs } from "@/app/_utils/arrays";
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
 import { CustomError } from "@/app/_utils/errors";
 import { withRate } from "@/app/_utils/rate";
-import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
+import {
+  getSpotifyArtistRelatedIds,
+  getSpotifyPlaylistArtistIds,
+} from "@/app/_utils/spotify";
+import { inngest } from "@/inngest/client";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+
+export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
+export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 300_000; // 5 minute(s)
+export const preloadRelatedIds = async (
+  userId: string,
+  spotifyApi: SpotifyApi,
+  spotifyArtistIds: string[],
+): Promise<string[][]> => {
+  const [
+    firstSpotifyArtistIdsBatch = [], //
+    secondSpotifyArtistIdsBatch = [],
+    thirdSpotifyArtistIdsBatch = [],
+    ...othersSpotifyArtistIdsBatchs
+  ] = getBatchs(
+    spotifyArtistIds, //
+    POST_PLAYLISTS_IMPORT_BATCH_SIZE,
+  );
+
+  await inngest.send(
+    othersSpotifyArtistIdsBatchs.map(
+      (spotifyArtistIdsBatch, spotifyArtistIdsBatchIndex) => {
+        const _ = POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS * spotifyArtistIdsBatchIndex; // prettier-ignore
+        return {
+          name: "spotify.related.imported",
+          data: {
+            user_id: userId, //
+            spotify_artist_ids: spotifyArtistIdsBatch,
+            delay_in_ms: _,
+          },
+        };
+      },
+    ),
+  );
+
+  const spotifyRelatedIdsBatchs: string[][] = [];
+  for (const spotifyArtistId of [
+    ...firstSpotifyArtistIdsBatch,
+    ...secondSpotifyArtistIdsBatch,
+    ...thirdSpotifyArtistIdsBatch,
+  ]) {
+    try {
+      const spotifyRelatedIds = await getSpotifyArtistRelatedIds(
+        spotifyApi, //
+        spotifyArtistId,
+      );
+      spotifyRelatedIdsBatchs.push(spotifyRelatedIds);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  return spotifyRelatedIdsBatchs.filter((spotifyRelatedIdsBatch) => {
+    return Boolean(spotifyRelatedIdsBatch.length);
+  });
+};
 
 export const POST = withRate(
-  { weight: 20 },
+  { weight: 20 + POST_PLAYLISTS_IMPORT_BATCH_SIZE * 3 },
   withAuth(
     async (
       request, //
@@ -65,6 +127,21 @@ export const POST = withRate(
         );
       }
 
+      let spotifyRelatedIdsBatchs: string[][] = [];
+      try {
+        spotifyRelatedIdsBatchs = await preloadRelatedIds(
+          userId, //
+          spotifyApi,
+          spotifyArtistIds,
+        );
+      } catch (error) {
+        console.log(error);
+        return Response.json(
+          { error: ErrorCode.SPOTIFY_UNKNOWN }, //
+          { status: 500 },
+        );
+      }
+
       await prisma.$transaction(async (tx) => {
         const { id: playlistId } = await tx.playlist.upsert({
           where: {
@@ -94,8 +171,17 @@ export const POST = withRate(
           tx, //
           userId,
           spotifyArtistIds,
-          { importedAt: new Date() },
+          { importedAt: new Date(), dugInAt: new Date() },
         );
+        for (const spotifyRelatedIds of spotifyRelatedIdsBatchs) {
+          const batchId = crypto.randomUUID();
+          await upsertArtistStatus(
+            tx, //
+            userId,
+            spotifyRelatedIds,
+            { batchId, score: 0, importedAt: new Date() },
+          );
+        }
       });
 
       return Response.json(

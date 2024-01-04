@@ -70,7 +70,7 @@ export const getSpotifyArtistRelatedIds = async (
     const { artists: spotifyArtists } =
       await spotifyApi.artists.relatedArtists(spotifyArtistId);
     spotifyArtistIds = spotifyArtists
-      .filter((spotifyArtist) => spotifyArtist.followers.total <= 50_000)
+      .filter((spotifyArtist) => spotifyArtist.followers.total <= 100_000)
       .map((spotifyArtist) => spotifyArtist.id);
   } catch (error) {
     console.log(error);

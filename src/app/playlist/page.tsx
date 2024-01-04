@@ -25,7 +25,7 @@ const PlaylistPage = () => {
           <Text className="text-base text-primary/70">
             Choisis la playlist d’où seront importés les artistes qui formeront
             la base de tes recherches. Par la suite, tu pourras décider, ou non,
-            de creuser certains de ces artistes pour t’en voir proposer d’autres
+            de creuser certains artistes pour t’en voir proposer d’autres
             similaires, et cela ainsi de suite jusqu’à découvrir la future
             pépite.
           </Text>

@@ -63,19 +63,19 @@ export const TopBarManualButton = () => {
         </DialogHeader>
         <div className="flex flex-col gap-1.5 mt-1">
           <ManualLine iconComponent={PickAxeIcon}>
-            Je connais et j’aime l’artiste.
+            Je connais, et j’aime l’artiste.
           </ManualLine>
           <ManualLine iconName="heart">
-            Je connais pas et j’aime l’artiste.
+            Je ne connais pas, mais j’aime l’artiste.
           </ManualLine>
           <ManualLine iconName="time">
-            Je connais pas et je passe l’artiste pour 6 mois.
+            Je ne connais pas, mais je pourrais aimer l’artiste.
           </ManualLine>
           <ManualLine iconName="dislike">
-            Je connais pas et je passe l’artiste pour 1 an.
+            Je ne connais pas, et je n’aime pas l’artiste.
           </ManualLine>
           <ManualLine iconName="close">
-            Je connais et je passe l’artiste pour 1 an.
+            Je connais, mais je n’aime pas l’artiste.
           </ManualLine>
           <ManualLine iconName="loop-left">
             J’importe les nouveaux artistes de ma playlist.

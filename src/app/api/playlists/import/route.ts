@@ -6,6 +6,7 @@ import { CustomError } from "@/app/_utils/errors";
 import { isImportable } from "@/app/_utils/playlists";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
+import { preloadRelatedIds } from "../route";
 
 export const POST = withRate(
   { weight: 20 },
@@ -66,20 +67,39 @@ export const POST = withRate(
           );
         }
       }
+      spotifyArtistIds = [...new Set(spotifyArtistIds)];
 
-      const spotifyArtistIdsSet = new Set<string>([]);
-      for (const spotifyArtistId of spotifyArtistIds) {
-        spotifyArtistIdsSet.add(spotifyArtistId);
+      let spotifyRelatedIdsBatchs: string[][] = [];
+      try {
+        spotifyRelatedIdsBatchs = await preloadRelatedIds(
+          userId, //
+          spotifyApi,
+          spotifyArtistIds,
+        );
+      } catch (error) {
+        console.log(error);
+        return Response.json(
+          { error: ErrorCode.SPOTIFY_UNKNOWN }, //
+          { status: 500 },
+        );
       }
-      spotifyArtistIds = Array.from(spotifyArtistIdsSet);
 
       await prisma.$transaction(async (tx) => {
         await upsertArtistStatus(
           tx, //
           userId,
           spotifyArtistIds,
-          { importedAt: new Date() },
+          { importedAt: new Date(), dugInAt: new Date() },
         );
+        for (const spotifyRelatedIds of spotifyRelatedIdsBatchs) {
+          const batchId = crypto.randomUUID();
+          await upsertArtistStatus(
+            tx, //
+            userId,
+            spotifyRelatedIds,
+            { batchId, score: 0, importedAt: new Date() },
+          );
+        }
       });
 
       return Response.json(

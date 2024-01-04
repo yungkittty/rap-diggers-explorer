@@ -1,4 +1,6 @@
-import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { inngest } from "@/inngest/client";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { GetEvents, GetFunctionInput, NonRetriableError } from "inngest";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 import { ErrorCode } from "../_constants/error-code";
@@ -72,6 +74,34 @@ export const withAuth =
     return callback(
       ...args, //
       userId,
+      getSpotifyApi(account),
+    );
+  };
+
+export const withAuthInngest =
+  <T extends keyof GetEvents<typeof inngest>>(
+    userId: string,
+    callback: (
+      params: GetFunctionInput<typeof inngest, T>,
+      spotifyApi: SpotifyApi,
+    ) => Promise<void>,
+  ) =>
+  async (
+    params: GetFunctionInput<typeof inngest, T>, //
+  ): Promise<void> => {
+    const accounts = await prisma.account.findMany({
+      where: {
+        userId,
+        provider: "spotify",
+      },
+    });
+    if (accounts.length !== 1) {
+      throw new NonRetriableError(ErrorCode.USER_FORBIDDEN);
+    }
+    const account = accounts[0];
+
+    return callback(
+      params, //
       getSpotifyApi(account),
     );
   };

@@ -10,10 +10,10 @@ type BottomBarTrackProps = {};
 export const BottomBarTrack = (props: BottomBarTrackProps) => {
   const {
     isInitialLoading, //
-    artistStatusCurrent,
   } = useContext(ArtistsStatusContext);
 
   const {
+    isLoading,
     trackCurrent, //
     trackNext,
     nextTrackCurrent,
@@ -21,7 +21,7 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
 
   return (
     <div className="flex flex-row flex-1">
-      {isInitialLoading || artistStatusCurrent ? (
+      {isInitialLoading || isLoading || trackCurrent ? (
         <>
           <div className="flex shrink-0 relative h-full aspect-square rounded-md overflow-hidden">
             <div className="flex flex-1 bg-foreground/10 animate-pulse" />
