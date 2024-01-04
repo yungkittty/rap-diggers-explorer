@@ -15,7 +15,7 @@ import { inngest } from "@/inngest/client";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
-export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 30_000; // 30 second(s)
+export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 60_000; // 60 second(s)
 export const preloadRelatedIds = async (
   userId: string,
   spotifyApi: SpotifyApi,
