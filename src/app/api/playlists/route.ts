@@ -31,21 +31,24 @@ export const preloadRelatedIds = async (
     POST_PLAYLISTS_IMPORT_BATCH_SIZE,
   );
 
-  await inngest.send(
-    othersSpotifyArtistIdsBatchs.map(
-      (spotifyArtistIdsBatch, spotifyArtistIdsBatchIndex) => {
-        const _ = POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS * spotifyArtistIdsBatchIndex; // prettier-ignore
-        return {
+  if (othersSpotifyArtistIdsBatchs.length) {
+    await inngest.send(
+      othersSpotifyArtistIdsBatchs.map(
+        (
+          spotifyArtistIdsBatch, //
+          spotifyArtistIdsBatchIndex,
+        ) => ({
           name: "spotify.related.imported",
           data: {
             user_id: userId, //
             spotify_artist_ids: spotifyArtistIdsBatch,
-            delay_in_ms: _,
+            delay_in_ms:
+              POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS * spotifyArtistIdsBatchIndex, // prettier-ignore
           },
-        };
-      },
-    ),
-  );
+        }),
+      ),
+    );
+  }
 
   const spotifyRelatedIdsBatchs: string[][] = [];
   for (const spotifyArtistId of [

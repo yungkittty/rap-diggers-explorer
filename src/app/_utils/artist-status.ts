@@ -13,31 +13,33 @@ export const upsertArtistStatus = async (
   userId: string,
   spotifyArtistIds: string[],
   artistStatus: Partial<ArtistStatus> = {},
-): Promise<void> => {
-  for (const spotifyArtistId of spotifyArtistIds) {
-    const { id: artistId } = await tx.artist.upsert({
-      where: {
-        spotifyId: spotifyArtistId,
-      },
-      create: {
-        spotifyId: spotifyArtistId,
-      },
-      update: {},
-    });
+): Promise<void[]> => {
+  return Promise.all(
+    spotifyArtistIds.map(async (spotifyArtistId) => {
+      const { id: artistId } = await tx.artist.upsert({
+        where: {
+          spotifyId: spotifyArtistId,
+        },
+        create: {
+          spotifyId: spotifyArtistId,
+        },
+        update: {},
+      });
 
-    await tx.artistStatus.upsert({
-      where: {
-        userId_artistId: {
+      await tx.artistStatus.upsert({
+        where: {
+          userId_artistId: {
+            userId,
+            artistId,
+          },
+        },
+        create: {
+          ...artistStatus,
           userId,
           artistId,
         },
-      },
-      create: {
-        ...artistStatus,
-        userId,
-        artistId,
-      },
-      update: {},
-    });
-  }
+        update: {},
+      });
+    }),
+  );
 };
