@@ -84,25 +84,29 @@ export const POST = withRate(
         );
       }
 
-      await prisma.$transaction(async (tx) => {
-        await upsertArtistStatus(
-          tx, //
-          userId,
-          spotifyArtistIds,
-          { importedAt: new Date(), dugInAt: new Date() },
-        );
-        await Promise.all(
-          spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
-            const batchId = crypto.randomUUID();
-            await upsertArtistStatus(
-              tx, //
-              userId,
-              spotifyRelatedIds,
-              { batchId, score: 0, importedAt: new Date() },
-            );
-          }),
-        );
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          // @TODO - This should upsert in batch instead of one-by-one!
+          await upsertArtistStatus(
+            tx, //
+            userId,
+            spotifyArtistIds,
+            { importedAt: new Date(), dugInAt: new Date() },
+          );
+          await Promise.all(
+            spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
+              const batchId = crypto.randomUUID();
+              await upsertArtistStatus(
+                tx, //
+                userId,
+                spotifyRelatedIds,
+                { batchId, score: 0, importedAt: new Date() },
+              );
+            }),
+          );
+        },
+        { timeout: 10_000 },
+      );
 
       return Response.json(
         {}, //

@@ -146,49 +146,53 @@ export const POST = withRate(
         );
       }
 
-      await prisma.$transaction(async (tx) => {
-        const { id: playlistId } = await tx.playlist.upsert({
-          where: {
-            spotifyId: spotifyPlaylistId,
-          },
-          create: {
-            spotifyId: spotifyPlaylistId,
-          },
-          update: {},
-        });
+      await prisma.$transaction(
+        async (tx) => {
+          const { id: playlistId } = await tx.playlist.upsert({
+            where: {
+              spotifyId: spotifyPlaylistId,
+            },
+            create: {
+              spotifyId: spotifyPlaylistId,
+            },
+            update: {},
+          });
 
-        await tx.playlistStatus.upsert({
-          where: {
-            userId_playlistId: {
+          await tx.playlistStatus.upsert({
+            where: {
+              userId_playlistId: {
+                userId,
+                playlistId,
+              },
+            },
+            create: {
               userId,
               playlistId,
             },
-          },
-          create: {
-            userId,
-            playlistId,
-          },
-          update: {},
-        });
+            update: {},
+          });
 
-        await upsertArtistStatus(
-          tx, //
-          userId,
-          spotifyArtistIds,
-          { importedAt: new Date(), dugInAt: new Date() },
-        );
-        await Promise.all(
-          spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
-            const batchId = crypto.randomUUID();
-            await upsertArtistStatus(
-              tx, //
-              userId,
-              spotifyRelatedIds,
-              { batchId, score: 0, importedAt: new Date() },
-            );
-          }),
-        );
-      });
+          // @TODO - This should upsert in batch instead of one-by-one!
+          await upsertArtistStatus(
+            tx, //
+            userId,
+            spotifyArtistIds,
+            { importedAt: new Date(), dugInAt: new Date() },
+          );
+          await Promise.all(
+            spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
+              const batchId = crypto.randomUUID();
+              await upsertArtistStatus(
+                tx, //
+                userId,
+                spotifyRelatedIds,
+                { batchId, score: 0, importedAt: new Date() },
+              );
+            }),
+          );
+        },
+        { timeout: 10_000 },
+      );
 
       return Response.json(
         {}, //
