@@ -143,7 +143,7 @@ export const ArtistsStatusContextProvider = (props: PropsWithChildren) => {
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Notre service est surchargé. Réessaie dans quelques minutes.", // prettier-ignore
+          description: "Notre service est surchargé. Réessaie dans quelques secondes.", // prettier-ignore
         });
         break;
       }
