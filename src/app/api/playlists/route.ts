@@ -15,16 +15,14 @@ import { inngest } from "@/inngest/client";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
-export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 90_000; // 90 second(s)
+export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 60_000; // 60 second(s)
 export const preloadRelatedIds = async (
   userId: string,
   spotifyApi: SpotifyApi,
   spotifyArtistIds: string[],
 ): Promise<string[][]> => {
   const [
-    firstSpotifyArtistIdsBatch = [], ////
-    secondSpotifyArtistIdsBatch = [],
-    thirdSpotifyArtistIdsBatch = [],
+    spotifyArtistIdsBatch = [], //
     ...othersSpotifyArtistIdsBatchs
   ] = getBatchs(
     spotifyArtistIds, //
@@ -52,11 +50,7 @@ export const preloadRelatedIds = async (
   }
 
   const spotifyRelatedIdsBatchs: string[][] = [];
-  for (const spotifyArtistId of [
-    ...firstSpotifyArtistIdsBatch,
-    ...secondSpotifyArtistIdsBatch,
-    ...thirdSpotifyArtistIdsBatch,
-  ]) {
+  for (const spotifyArtistId of spotifyArtistIdsBatch) {
     try {
       const spotifyRelatedIds = await getSpotifyArtistRelatedIds(
         spotifyApi, //
@@ -75,7 +69,7 @@ export const preloadRelatedIds = async (
 };
 
 export const POST = withRate(
-  { weight: 20 + POST_PLAYLISTS_IMPORT_BATCH_SIZE * 3 },
+  { weight: 20 + POST_PLAYLISTS_IMPORT_BATCH_SIZE },
   withAuth(
     async (
       request, //
