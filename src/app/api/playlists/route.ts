@@ -15,7 +15,7 @@ import { inngest } from "@/inngest/client";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
-export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 60_000; // 60 second(s)
+export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 90_000; // 90 second(s)
 export const preloadRelatedIds = async (
   userId: string,
   spotifyApi: SpotifyApi,
@@ -177,15 +177,17 @@ export const POST = withRate(
           spotifyArtistIds,
           { importedAt: new Date(), dugInAt: new Date() },
         );
-        for (const spotifyRelatedIds of spotifyRelatedIdsBatchs) {
-          const batchId = crypto.randomUUID();
-          await upsertArtistStatus(
-            tx, //
-            userId,
-            spotifyRelatedIds,
-            { batchId, score: 0, importedAt: new Date() },
-          );
-        }
+        await Promise.all(
+          spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
+            const batchId = crypto.randomUUID();
+            await upsertArtistStatus(
+              tx, //
+              userId,
+              spotifyRelatedIds,
+              { batchId, score: 0, importedAt: new Date() },
+            );
+          }),
+        );
       });
 
       return Response.json(

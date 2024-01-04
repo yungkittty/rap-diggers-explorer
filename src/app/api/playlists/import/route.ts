@@ -91,15 +91,17 @@ export const POST = withRate(
           spotifyArtistIds,
           { importedAt: new Date(), dugInAt: new Date() },
         );
-        for (const spotifyRelatedIds of spotifyRelatedIdsBatchs) {
-          const batchId = crypto.randomUUID();
-          await upsertArtistStatus(
-            tx, //
-            userId,
-            spotifyRelatedIds,
-            { batchId, score: 0, importedAt: new Date() },
-          );
-        }
+        await Promise.all(
+          spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
+            const batchId = crypto.randomUUID();
+            await upsertArtistStatus(
+              tx, //
+              userId,
+              spotifyRelatedIds,
+              { batchId, score: 0, importedAt: new Date() },
+            );
+          }),
+        );
       });
 
       return Response.json(
