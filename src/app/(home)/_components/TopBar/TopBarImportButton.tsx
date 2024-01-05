@@ -17,6 +17,7 @@ import {
   POST_PlaylistsImportOutput,
 } from "@/app/_types/api";
 import { CustomError } from "@/app/_utils/errors";
+import { useSWRConfig } from "swr";
 import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
 
@@ -102,13 +103,14 @@ export const TopBarImportButton = () => {
     }
   };
 
+  const { mutate: mutateGlobal } = useSWRConfig();
   const configuration = {
     throwOnError: false,
     onSuccess: handleSuccess,
     onError: handleError,
   };
   const { trigger, isMutating } = useSWRMutation(
-    "/api/playlists/playlist", //
+    "/api/playlists/import", //
     postPlaylistsImport,
     configuration,
   );
@@ -118,6 +120,7 @@ export const TopBarImportButton = () => {
     }
     await trigger();
     await mutate({ isImportable: false });
+    await mutateGlobal(["/api/artist-status", null]);
   };
 
   const isDisabled = isImportable !== true;
