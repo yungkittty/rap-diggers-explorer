@@ -90,7 +90,6 @@ export const GET = withRate(
       const spotifyArtistIds = artistStatus.map(
         (artistStatus) => artistStatus.artist.spotifyId,
       );
-
       let spotifyArtists: Artist[] = [];
       try {
         spotifyArtists = await spotifyApi.artists.get(spotifyArtistIds);

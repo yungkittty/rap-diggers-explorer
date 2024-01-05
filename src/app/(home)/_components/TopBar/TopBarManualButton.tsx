@@ -28,8 +28,7 @@ const ManualLine = (props: ManualLineProps) => {
   return (
     <div className="flex flex-row items-center text-base text-primary">
       {iconName ? <Icon name={iconName} filled /> : <IconComponent />}
-      <Text className="mx-2.5">=</Text>
-      <Text>{children}</Text>
+      <Text className="ml-3">{children}</Text>
     </div>
   );
 };

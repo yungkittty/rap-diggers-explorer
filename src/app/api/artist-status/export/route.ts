@@ -1,5 +1,8 @@
+import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
 import { withAuth } from "@/app/_utils/auth";
+import { withRate } from "@/app/_utils/rate";
+import { Artist } from "@spotify/web-api-ts-sdk";
 
 const getFileName = () => {
   const now = new Date();
@@ -9,59 +12,80 @@ const getFileName = () => {
   return `explorer_${years}_${months}_${days}`;
 };
 
-export const GET = withAuth(
-  async (
-    request, //
-    _,
-    userId,
-  ) => {
-    const artistStatus = await prisma.artistStatus.findMany({
-      select: {
-        id: true,
-        artist: {
-          select: {
-            spotifyId: true,
+export const GET = withRate(
+  { weight: 1 },
+  withAuth(
+    async (
+      request, //
+      _,
+      userId,
+      spotifyApi,
+    ) => {
+      const artistStatus = await prisma.artistStatus.findMany({
+        select: {
+          id: true,
+          artist: {
+            select: {
+              spotifyId: true,
+            },
           },
         },
-      },
-      where: {
-        userId,
-        likedAt: { not: null },
-        exportedAt: null,
-      },
-    });
-    const artistStatusIds = artistStatus.map((artistStatus) => artistStatus.id);
-
-    const fileName = getFileName();
-    const fileData = artistStatus
-      .map(
-        (artistStatus) =>
-          `https://open.spotify.com/artist/${artistStatus.artist.spotifyId}`,
-      )
-      .join("\n");
-    // https://vercel.com/docs/functions/serverless-functions/runtimes#request-body-size
-    if (fileData.length > 4_500_000) {
-      throw new Error(""); // @TODO - ...
-    }
-
-    if (artistStatusIds.length) {
-      await prisma.artistStatus.updateMany({
-        data: {
-          exportedAt: new Date(),
-        },
         where: {
-          id: { in: artistStatusIds },
+          userId,
+          likedAt: { not: null },
+          exportedAt: null,
         },
       });
-    }
 
-    const headers = new Headers({
-      "Content-Type": "text/plain",
-      "Content-Disposition": `attachment; filename="${fileName}.txt"`,
-    });
-    return new Response(
-      fileData, //
-      { status: 200, headers },
-    );
-  },
+      const spotifyArtistIds = artistStatus.map(
+        (artistStatus) => artistStatus.artist.spotifyId,
+      );
+      let spotifyArtists: Artist[] = [];
+      if (spotifyArtistIds.length) {
+        try {
+          spotifyArtists = await spotifyApi.artists.get(spotifyArtistIds);
+        } catch (error) {
+          console.log(error);
+          return Response.json(
+            { error: ErrorCode.SPOTIFY_UNKNOWN }, //
+            { status: 500 },
+          );
+        }
+      }
+
+      const fileName = getFileName();
+      const fileData = spotifyArtists
+        .map((spotifyArtist) => {
+          return `${spotifyArtist.name} • ${spotifyArtist.external_urls["spotify"]}`;
+        })
+        .join("\n");
+      // https://vercel.com/docs/functions/serverless-functions/runtimes#request-body-size
+      if (fileData.length > 4_500_000) {
+        throw new Error(""); // @TODO - ...
+      }
+
+      const artistStatusIds = artistStatus.map(
+        (artistStatus) => artistStatus.id,
+      );
+      if (artistStatusIds.length) {
+        await prisma.artistStatus.updateMany({
+          data: {
+            exportedAt: new Date(),
+          },
+          where: {
+            id: { in: artistStatusIds },
+          },
+        });
+      }
+
+      const headers = new Headers({
+        "Content-Type": "text/plain",
+        "Content-Disposition": `attachment; filename="${fileName}.txt"`,
+      });
+      return new Response(
+        fileData, //
+        { status: 200, headers },
+      );
+    },
+  ),
 );
