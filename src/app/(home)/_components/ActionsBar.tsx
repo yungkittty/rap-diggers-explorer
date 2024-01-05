@@ -236,7 +236,7 @@ export const ActionsBar = (props: ActionsBarProps) => {
     };
 
   return (
-    <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center pb-12">
+    <div className="flex flex-row space-x-3 sm:space-x-6 justify-center items-center pb-6 tall:pb-12">
       <ActionButton
         iconComponent={PickAxeIcon}
         size="small"

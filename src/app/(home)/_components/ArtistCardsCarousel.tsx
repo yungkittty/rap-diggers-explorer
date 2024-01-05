@@ -18,7 +18,7 @@ export const ArtistCardsCarousel = (props: ArtistCardsCarouselProps) => {
   } = useContext(ArtistsStatusContext);
 
   return (
-    <div className="flex flex-row flex-1 pt-12 pb-12 overflow-hidden">
+    <div className="flex flex-row flex-1 pt-6 tall:pt-12 pb-6 tall:pb-12 overflow-hidden">
       <div
         className="relative flex flex-row flex-1"
         style={{

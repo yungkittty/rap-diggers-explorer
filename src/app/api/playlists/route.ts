@@ -180,7 +180,7 @@ export const POST = withRate(
                 tx, //
                 userId,
                 spotifyRelatedIds,
-                { batchId, score: 0, importedAt: new Date() },
+                { batchId, score: 0 },
               );
             }),
           );

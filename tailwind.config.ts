@@ -16,8 +16,11 @@ const config: Config = {
       },
     },
     extend: {
+      screens: {
+        //https://tailwindcss.com/docs/screens#custom-media-queries
+        tall: { raw: "(min-height: 800px)" },
+      },
       colors: {
-        // This defines ...
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -52,6 +55,7 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
 
+        // https://developer.spotify.com/documentation/design#using-our-colors
         spotify: "#1DB954",
       },
       borderRadius: {

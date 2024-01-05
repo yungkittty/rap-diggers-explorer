@@ -72,11 +72,11 @@ export const ArtistCard = (props: ArtistCardProps) => {
               />
             ) : null}
           </div>
-          <Heading className="mt-[calc(100%/2/2/2/2/1.125)] text-2xl text-primary">
+          <Heading className="mt-[calc(100%/2/2/2/2/1.125)] text-lg tall:text-2xl text-primary">
             {artist?.spotifyName}
           </Heading>
-          <div className="flex flex-col justify-center items-center mt-[calc(100%/2/2/2/2)]">
-            <Text className="text-2xl text-primary font-bold">
+          <div className="flex flex-col justify-center items-center mt-[calc(100%/2/2/2/2/2)] tall:mt-[calc(100%/2/2/2/2)]">
+            <Text className="text-lg tall:text-2xl text-primary font-bold">
               {artist?.spotifyFollowersTotal != null
                 ? Intl.NumberFormat(
                     "fr-FR", //
@@ -84,7 +84,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
                   ).format(artist?.spotifyFollowersTotal)
                 : null}
             </Text>
-            <Text className="mt-1 text-sm text-primary/70 uppercase">
+            <Text className="mt-0.5 text-xs tall:text-sm text-primary/70 uppercase">
               abonné·e·s
             </Text>
           </div>
