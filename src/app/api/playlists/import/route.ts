@@ -86,7 +86,6 @@ export const POST = withRate(
 
       await prisma.$transaction(
         async (tx) => {
-          // @TODO - This should upsert in batch instead of one-by-one!
           await upsertArtistStatus(
             tx, //
             userId,

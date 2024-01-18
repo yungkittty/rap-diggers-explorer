@@ -166,7 +166,6 @@ export const POST = withRate(
             update: {},
           });
 
-          // @TODO - This should upsert in batch instead of one-by-one!
           await upsertArtistStatus(
             tx, //
             userId,

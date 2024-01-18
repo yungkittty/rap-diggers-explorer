@@ -1,3 +1,4 @@
+import { createId } from "@paralleldrive/cuid2";
 import type { ArtistStatus, PrismaClient } from "@prisma/client";
 
 export const upsertArtistStatus = async (
@@ -23,6 +24,10 @@ export const upsertArtistStatus = async (
     >
   > = {},
 ): Promise<void> => {
+  if (!spotifyArtistIds.length) {
+    return;
+  }
+
   // @TODO - This isn't safe!
   await tx.$executeRawUnsafe(/* SQL */ `
     INSERT INTO "Artist" (
@@ -33,8 +38,9 @@ export const upsertArtistStatus = async (
     )
     VALUES ${spotifyArtistIds
       .map((spotifyArtistId) => {
+        // This makes sure ids have the same formating as prisma!
         return `(
-          '${crypto.randomUUID()}',
+          '${createId()}',
           '${spotifyArtistId}',
           NOW(),
           NOW()
