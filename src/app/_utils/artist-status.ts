@@ -12,34 +12,74 @@ export const upsertArtistStatus = async (
   >,
   userId: string,
   spotifyArtistIds: string[],
-  artistStatus: Partial<ArtistStatus> = {},
-): Promise<void[]> => {
-  return Promise.all(
-    spotifyArtistIds.map(async (spotifyArtistId) => {
-      const { id: artistId } = await tx.artist.upsert({
-        where: {
-          spotifyId: spotifyArtistId,
-        },
-        create: {
-          spotifyId: spotifyArtistId,
-        },
-        update: {},
-      });
+  artistStatus: Partial<
+    Pick<
+      ArtistStatus,
+      | "parentId" //
+      | "batchId"
+      | "score"
+      | "dugInAt"
+      | "importedAt"
+    >
+  > = {},
+): Promise<void> => {
+  // @TODO - This isn't safe!
+  await tx.$executeRawUnsafe(/* SQL */ `
+    INSERT INTO "Artist" (
+      id,
+      "spotifyId",
+      "createdAt",
+      "updatedAt"
+    )
+    VALUES ${spotifyArtistIds
+      .map((spotifyArtistId) => {
+        return `(
+          '${crypto.randomUUID()}',
+          '${spotifyArtistId}',
+          NOW(),
+          NOW()
+        )`;
+      })
+      .join(",")}
+    ON CONFLICT ("spotifyId")
+    DO NOTHING;
+  `);
 
-      await tx.artistStatus.upsert({
-        where: {
-          userId_artistId: {
-            userId,
-            artistId,
-          },
-        },
-        create: {
-          ...artistStatus,
-          userId,
-          artistId,
-        },
-        update: {},
-      });
-    }),
-  );
+  // @TODO - This isn't safe!
+  await tx.$executeRawUnsafe(/* SQL */ `
+    INSERT INTO "ArtistStatus" (
+      id,
+      -- this is required
+      "createdAt",
+      "updatedAt",
+      "userId",
+      "artistId",
+      -- this isn't required
+      "parentId",
+      "batchId",
+      "score",
+      "dugInAt",
+      "importedAt"
+    )
+    SELECT
+      id,
+      NOW(),
+      NOW(),
+      '${userId}',
+      id,
+      ${artistStatus.parentId != null ? `'${artistStatus.parentId}'` : "NULL"},
+      ${artistStatus.batchId != null ? `'${artistStatus.batchId}'` : "NULL"},
+      ${artistStatus.score != null ? `${artistStatus.score}` : "NULL"},
+      -- @TODO - This could leads to issue(s)!
+      ${artistStatus.dugInAt != null ? `NOW()` : "NULL"},
+      ${artistStatus.importedAt != null ? `NOW()` : "NULL"}
+    FROM "Artist"
+    WHERE "Artist"."spotifyId" IN (${spotifyArtistIds
+      .map((spotifyArtistId) => {
+        return `'${spotifyArtistId}'`;
+      })
+      .join(",")})
+    ON CONFLICT ("userId", "artistId")
+    DO NOTHING;
+  `);
 };
