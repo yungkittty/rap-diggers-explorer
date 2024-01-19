@@ -6,6 +6,7 @@ import { CustomError } from "@/app/_utils/errors";
 import { isImportable } from "@/app/_utils/playlists";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
+import { createId } from "@paralleldrive/cuid2";
 import { preloadRelatedIds } from "../route";
 
 export const POST = withRate(
@@ -90,11 +91,11 @@ export const POST = withRate(
             tx, //
             userId,
             spotifyArtistIds,
-            { importedAt: new Date(), dugInAt: new Date() },
+            { isImported: true, isDugIn: true },
           );
           await Promise.all(
             spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
-              const batchId = crypto.randomUUID();
+              const batchId = createId();
               await upsertArtistStatus(
                 tx, //
                 userId,

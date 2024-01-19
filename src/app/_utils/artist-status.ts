@@ -19,16 +19,16 @@ export const upsertArtistStatus = async (
       | "parentId" //
       | "batchId"
       | "score"
-      | "dugInAt"
-      | "importedAt"
     >
-  > = {},
+  > & {
+    isDugIn?: boolean;
+    isImported?: boolean;
+  } = {},
 ): Promise<void> => {
   if (!spotifyArtistIds.length) {
     return;
   }
 
-  // @TODO - This isn't safe!
   await tx.$executeRawUnsafe(/* SQL */ `
     INSERT INTO "Artist" (
       id,
@@ -38,10 +38,11 @@ export const upsertArtistStatus = async (
     )
     VALUES ${spotifyArtistIds
       .map((spotifyArtistId) => {
-        // This makes sure ids have the same formating as prisma!
+        const artistId = createId();
+        const artistSpotifyId = spotifyArtistId;
         return `(
-          '${createId()}',
-          '${spotifyArtistId}',
+          '${artistId}',
+          '${artistSpotifyId}',
           NOW(),
           NOW()
         )`;
@@ -51,7 +52,15 @@ export const upsertArtistStatus = async (
     DO NOTHING;
   `);
 
-  // @TODO - This isn't safe!
+  const artists = await tx.artist.findMany({
+    select: {
+      id: true,
+    },
+    where: {
+      spotifyId: { in: spotifyArtistIds },
+    },
+  });
+
   await tx.$executeRawUnsafe(/* SQL */ `
     INSERT INTO "ArtistStatus" (
       id,
@@ -67,24 +76,34 @@ export const upsertArtistStatus = async (
       "dugInAt",
       "importedAt"
     )
-    SELECT
-      id,
-      NOW(),
-      NOW(),
-      '${userId}',
-      id,
-      ${artistStatus.parentId != null ? `'${artistStatus.parentId}'` : "NULL"},
-      ${artistStatus.batchId != null ? `'${artistStatus.batchId}'` : "NULL"},
-      ${artistStatus.score != null ? `${artistStatus.score}` : "NULL"},
-      -- @TODO - This could leads to issue(s)!
-      ${artistStatus.dugInAt != null ? `NOW()` : "NULL"},
-      ${artistStatus.importedAt != null ? `NOW()` : "NULL"}
-    FROM "Artist"
-    WHERE "Artist"."spotifyId" IN (${spotifyArtistIds
-      .map((spotifyArtistId) => {
-        return `'${spotifyArtistId}'`;
+    VALUES ${artists
+      .map((artist) => {
+        const artistStatusId = createId();
+        const artistStatusUserId = userId;
+        const artistStatusArtistId = artist.id;
+        const {
+          parentId, //
+          batchId,
+          score,
+          isDugIn,
+          isImported,
+        } = artistStatus;
+        return `(
+          '${artistStatusId}',
+          -- this is required
+          NOW(),
+          NOW(),
+          '${artistStatusUserId}',
+          '${artistStatusArtistId}',
+          -- this isn't required
+          ${parentId != null ? `'${parentId}'` : "NULL"},
+          ${batchId != null ? `'${batchId}'` : "NULL"},
+          ${score != null ? score : "NULL"},
+          ${isDugIn ? `NOW()` : "NULL"},
+          ${isImported ? `NOW()` : "NULL"}
+        )`;
       })
-      .join(",")})
+      .join(",")}
     ON CONFLICT ("userId", "artistId")
     DO NOTHING;
   `);

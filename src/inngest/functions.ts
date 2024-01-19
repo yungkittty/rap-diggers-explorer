@@ -9,6 +9,7 @@ import { withAuthInngest } from "@/app/_utils/auth";
 import { withRateInngest } from "@/app/_utils/rate";
 import { getSpotifyArtistRelatedIds } from "@/app/_utils/spotify";
 import { POST_PLAYLISTS_IMPORT_BATCH_SIZE } from "@/app/api/playlists/route";
+import { createId } from "@paralleldrive/cuid2";
 import { RetryAfterError } from "inngest";
 import { inngest } from "./client";
 
@@ -64,12 +65,12 @@ export const importRelated = inngest.createFunction(
 
             await prisma.$transaction(async (tx) => {
               for (const spotifyRelatedIds of spotifyRelatedIdsBatchs) {
-                const batchId = crypto.randomUUID();
+                const batchId = createId();
                 await upsertArtistStatus(
                   tx, //
                   userId,
                   spotifyRelatedIds,
-                  { batchId, score: 0 }, // @TODO - importedAt: new Date()
+                  { batchId, score: 0 },
                 );
               }
             });

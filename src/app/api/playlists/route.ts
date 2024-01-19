@@ -12,6 +12,7 @@ import {
   getSpotifyPlaylistArtistIds,
 } from "@/app/_utils/spotify";
 import { inngest } from "@/inngest/client";
+import { createId } from "@paralleldrive/cuid2";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
@@ -63,9 +64,9 @@ export const preloadRelatedIds = async (
     }
   }
 
-  return spotifyRelatedIdsBatchs.filter((spotifyRelatedIdsBatch) => {
-    return Boolean(spotifyRelatedIdsBatch.length);
-  });
+  return spotifyRelatedIdsBatchs.filter(
+    (spotifyRelatedIdsBatch) => Boolean(spotifyRelatedIdsBatch.length), //
+  );
 };
 
 export const POST = withRate(
@@ -170,11 +171,11 @@ export const POST = withRate(
             tx, //
             userId,
             spotifyArtistIds,
-            { importedAt: new Date(), dugInAt: new Date() },
+            { isImported: true, isDugIn: true },
           );
           await Promise.all(
             spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
-              const batchId = crypto.randomUUID();
+              const batchId = createId();
               await upsertArtistStatus(
                 tx, //
                 userId,
