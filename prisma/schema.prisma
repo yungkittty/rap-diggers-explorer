@@ -96,6 +96,8 @@ model Artist {
 model PlaylistStatus {
   id String @id @default(cuid())
 
+  subscribedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

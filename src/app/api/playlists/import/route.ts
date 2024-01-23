@@ -37,19 +37,22 @@ export const POST = withRate(
         where: {
           userId,
         },
+        orderBy: {
+          subscribedAt: { sort: "asc", nulls: "first" },
+        },
       });
       const spotifyPlaylistIds = playlistStatus.map(
         (playlistStatus) => playlistStatus.playlist.spotifyId,
       );
 
-      let spotifyArtistIds: string[] = [];
+      let spotifyArtistIdsBatchs: string[][] = [];
       for (const spotifyPlaylistId of spotifyPlaylistIds) {
         try {
-          const spotifyArtistIds_ = await getSpotifyPlaylistArtistIds(
+          const spotifyArtistIds = await getSpotifyPlaylistArtistIds(
             spotifyApi,
             spotifyPlaylistId,
           );
-          spotifyArtistIds.push(...spotifyArtistIds_);
+          spotifyArtistIdsBatchs.push(spotifyArtistIds);
         } catch (error) {
           console.log(error);
           if (error instanceof CustomError) {
@@ -68,7 +71,18 @@ export const POST = withRate(
           );
         }
       }
-      spotifyArtistIds = [...new Set(spotifyArtistIds)];
+
+      const [
+        spotifyArtistIdsBatch = [], //
+        ...othersSpotifyArtistIdsBatchs
+      ] = spotifyArtistIdsBatchs;
+
+      const spotifyArtistIds = [
+        ...new Set(spotifyArtistIdsBatch), //
+      ];
+      const spotifyArtistIdsOthers = [
+        ...new Set(othersSpotifyArtistIdsBatchs.flat()),
+      ];
 
       let spotifyRelatedIdsBatchs: string[][] = [];
       try {
@@ -92,6 +106,12 @@ export const POST = withRate(
             userId,
             spotifyArtistIds,
             { isImported: true, isDugIn: true },
+          );
+          await upsertArtistStatus(
+            tx, //
+            userId,
+            spotifyArtistIdsOthers,
+            { isImported: true }, // score: 0
           );
           await Promise.all(
             spotifyRelatedIdsBatchs.map(async (spotifyRelatedIds) => {
