@@ -119,7 +119,7 @@ export const TopBarAvatarMenu = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AlertDialogContent className="gap-4">
+      <AlertDialogContent className="w-[550px] gap-4">
         <AlertDialogTitle>
           <Heading>Est-ce que tu es sûr ?</Heading>
         </AlertDialogTitle>
@@ -130,7 +130,7 @@ export const TopBarAvatarMenu = () => {
             irréversible. <span className="text-primary">😵‍💫</span>
           </Text>
         </AlertDialogDescription>
-        <AlertDialogFooter className="gap-1.5">
+        <AlertDialogFooter className="gap-0.5">
           <AlertDialogCancel className="flex-1">
             <Text className="font-bold uppercase leading-none">Non</Text>
           </AlertDialogCancel>

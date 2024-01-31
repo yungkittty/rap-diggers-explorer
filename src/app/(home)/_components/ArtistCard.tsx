@@ -98,7 +98,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
       ) : null}
       <div
         className={cn(
-          "absolute h-[125%] w-[125%] mt-[-25%] ml-[-25%] bg-background/90 backdrop-blur-xl transition-all duration-700 overflow-hidden", //
+          "absolute h-[125%] w-[125%] mt-[-25%] ml-[-25%] bg-background transition-all duration-700 overflow-hidden", //
           { "bg-transparent backdrop-blur-none pointer-events-none": isFocused }, // prettier-ignore
         )}
       />

@@ -10,7 +10,7 @@ export const Text = (props: TextProps) => {
   return (
     <p
       className={cn(
-        "select-none font-helvetica leading-snug tracking-tight", //
+        "select-none font-helvetica leading-snug tracking-normal", //
         className,
       )}
       {...others} //

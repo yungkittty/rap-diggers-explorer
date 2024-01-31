@@ -5,7 +5,6 @@ import { Text } from "@/app/_components/Text";
 import { Button } from "@/app/_components/ui/button";
 import {
   Tooltip,
-  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/app/_components/ui/tooltip";
@@ -142,7 +141,7 @@ export const TopBarImportButton = () => {
               )}
             >
               <Text className="font-bold uppercase leading-none">
-                réimporter
+                mettre-à-jour
               </Text>
               <Icon className="ml-2.5 text-lg" name="loop-left" />
             </div>
@@ -155,13 +154,14 @@ export const TopBarImportButton = () => {
             />
           </Button>
         </TooltipTrigger>
-        {isImportable === false ? (
+        {/* @TODO - ... */}
+        {/* {isImportable === false ? (
           <TooltipContent align="end" sideOffset={2 * 4}>
             <Text className="text-primary text-base">
               Il est possible d’importer qu’une seul fois par jour
             </Text>
           </TooltipContent>
-        ) : null}
+        ) : null} */}
       </Tooltip>
     </TooltipProvider>
   );

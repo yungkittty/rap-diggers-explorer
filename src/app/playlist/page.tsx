@@ -7,57 +7,18 @@ import { FormFooter } from "./_components/FormFooter";
 const PlaylistPage = () => {
   return (
     <div className="m-auto flex flex-col items-center justify-center">
-      <Card className="w-full sm:w-3/4 md:w-3/5 lg:w-1/2 xl:w-2/5 2xl:w-1/3">
-        <CardHeader className="space-y-4 pb-[18px]">
+      <Card className="w-full sm:w-[550px]">
+        <CardHeader className="space-y-4 pb-4">
           <CardTitle>
-            <Heading>Choisis ta playlist</Heading>
+            <Heading>Créer ta playlist</Heading>
           </CardTitle>
-          {/* <CardDescription> - text-sm text-muted-foreground */}
-          {/* Choisis la playlist Spotify d’où seront importés les artistes qui
-            formeront la base de tes recherches. Par la suite, tu pourras
-            décider, ou non, de creuser certains de ces artistes pour t’en voir
-            proposer des similaires. C’est par la répétition de ce procédé que
-            tu découvriras la future pépite. */}
-          {/* Choisis la playlist Spotify d’où seront importés tes premiers
-            artistes. Ensuite, tu pourras décider, ou non, de creuser certains
-            de ces artistes pour t’en voir proposer des similaires et cela ainsi
-            de suite jusqu’à la découverte de ta futur pépite. */}
           <Text className="text-base text-primary/70">
-            Choisis la playlist d’où seront importés les artistes qui formeront
-            la base de tes recherches. Par la suite, tu pourras décider, ou non,
-            de creuser certains artistes pour t’en voir proposer d’autres
-            similaires, et cela ainsi de suite jusqu’à découvrir la future
-            pépite.
+            Crée une playlist avec des morceaux d’artistes que tu aimes. À
+            partir de cette playlist, nous serons en mesure de te proposer des
+            artistes similaires que tu pourras décider de creuser, ou non, et
+            cela ainsi de suite jusqu’à trouver la future pépite.
+            <span className="ml-1 text-primary">✨</span>
           </Text>
-          <Text className="text-base text-primary/70">
-            <span className="mr-1.5 text-primary">⚠️</span>Il est possible qu’au
-            cours de tes recherches, tu arrives à court d’artistes ou simplement
-            que tu veuilles en importer de nouveaux. Tu pourras le faire, mais
-            cela <span className="underline">uniquement</span> depuis ta
-            playlist.
-          </Text>
-          {/* <span className="mr-1.5 text-primary">⚠️</span>Il est possible que
-            tu arrives à court d’artistes, tu pourras à tout moment réimporter
-            de nouveaux. Cependant, tu pourras en réimporter seulement depuis
-            cette playlist. Ainsi, le choix de la playlist est{" "}
-            <span className="underline">définitif</span> ! */}
-          {/* <span className="mr-1.5 text-primary">⚠️</span>Si tu arrives à court
-            d’artistes, tu pourras à tout moment réimporter de nouveaux.
-            Cependant, tu pourras en réimporter seulement depuis cette playlist.
-            Ainsi, le choix de la playlist est{" "}
-            <span className="underline">définitif</span> ! */}
-          {/* Pourquoi, attention ? */}
-          {/* <Text className="text-base text-primary/70">
-            <span className="mr-1.5 text-primary">⚠️</span>Attention, une fois
-            ta playlist choisie, tu ne pourras plus la changer. Cependant, tu
-            pourras toujours réimporter les nouveaux artistes que tu auras
-            ajoutés à celle-ci.
-          </Text> */}
-          {/* <Text className="text-base text-primary/70">
-            <span className="mr-1.5 text-primary">👉</span>Tu pourras à tous
-            moment réimporter les nouveaux artistes que tu y auras ajoutés.
-            Cependant, tu ne pourras plus de playlist une fois choisie !
-          </Text> */}
           {/* </CardDescription> */}
         </CardHeader>
         <FormFooter />

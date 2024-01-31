@@ -59,21 +59,21 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
           </div>
           <div className="flex flex-col justify-between my-0.5 ml-3 min-w-0">
             {trackCurrent ? (
-              <Text className="uppercase text-base text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
+              <Text className="uppercase text-base text-foreground leading-none tracking-tight whitespace-nowrap text-ellipsis overflow-hidden">
                 {trackCurrent.spotifyName}
               </Text>
             ) : (
               <div className="h-4 w-56 bg-foreground/10 animate-pulse" />
             )}
             {trackCurrent ? (
-              <Text className="mt-[-1px] uppercase text-sm text-foreground leading-none whitespace-nowrap text-ellipsis overflow-hidden">
+              <Text className="mt-[-1px] uppercase text-sm text-foreground leading-none tracking-tight whitespace-nowrap text-ellipsis overflow-hidden">
                 {trackCurrent.spotifyArtistNames.join(" • ")}
               </Text>
             ) : (
               <div className="mt-[-1px] h-3.5 w-28 bg-foreground/10 animate-pulse" />
             )}
             {trackCurrent ? (
-              <Text className="uppercase text-xs text-primary/70 leading-none whitespace-nowrap text-ellipsis overflow-hidden">
+              <Text className="uppercase text-xs text-primary/70 leading-none tracking-tight whitespace-nowrap text-ellipsis overflow-hidden">
                 {new Intl.DateTimeFormat(
                   "fr-FR", //
                   { month: "short", year: "numeric" },

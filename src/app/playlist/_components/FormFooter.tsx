@@ -104,46 +104,25 @@ export const FormFooter = () => {
     <CardFooter className="flex flex-col">
       <div className="relative w-full">
         <div className="absolute flex h-full w-1/2 items-center justify-center rounded-l-md border border-solid border-input bg-primary/5">
-          <Text className="text-base text-primary/60">
+          <Text className="text-base text-primary/50">
             https://open.spotify.com/playlist/
           </Text>
         </div>
         <Input
-          className="pl-[calc(50%+12px)] text-base text-primary focus-visible:ring-ring/90"
+          className="pl-[calc(50%+8px)] text-base text-primary focus-visible:ring-ring/90"
           value={value}
           onChange={handleChange}
           spellCheck={false}
         />
       </div>
-      {/* <div className="flex flex-row items-center w-full mt-1.5 text-sm text-foreground/90">
-        <Checkbox id="playlist" />
-        <label className="ml-1.5" htmlFor="playlist">
-          <Text className="leading-none">
-            J’aime l’intégralité des artistes de cette playlist
-          </Text>
-        </label>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <Icon className="ml-1 text-base" name="question" filled={false} />
-            </TooltipTrigger>
-            <TooltipContent>
-              <Text className="text-primary text-base">
-                Si tu coches cette case, nous irons automatiquement creuser les
-                artistes de cette playlist
-              </Text>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider> 
-      </div> */}
       <Button
-        className="mt-3 w-full"
+        className="mt-2.5 w-full"
         size="lg"
         onClick={handleClick}
         disabled={isDisabled}
       >
         {!isMutating ? (
-          <Text className="font-bold uppercase leading-none">importer</Text>
+          <Text className="font-bold uppercase leading-none">confirmer</Text>
         ) : (
           <Icon className="animate-spin" name="loader-4" />
         )}

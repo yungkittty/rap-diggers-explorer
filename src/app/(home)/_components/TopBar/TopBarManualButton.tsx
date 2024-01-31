@@ -76,12 +76,6 @@ export const TopBarManualButton = () => {
           <ManualLine iconName="close">
             Je connais, mais je n’aime pas l’artiste.
           </ManualLine>
-          <ManualLine iconName="loop-left">
-            J’importe les nouveaux artistes de ma playlist.
-          </ManualLine>
-          <ManualLine iconName="download">
-            J’exporte les artistes aimés depuis le dernier export.
-          </ManualLine>
         </div>
       </DialogContent>
     </Dialog>
