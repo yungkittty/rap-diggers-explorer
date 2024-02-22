@@ -45,7 +45,7 @@ export const POST = withRate(
           subscribedAt: { sort: "asc", nulls: "first" },
         },
       });
-      if (playlistStatus.length >= USER_MAX_PLAYLISTS) {
+      if (playlistStatus.length > USER_MAX_PLAYLISTS) {
         return Response.json(
           { error: ErrorCode.USER_FORBIDDEN_MAX_PLAYLISTS }, //
           { status: 403 },
