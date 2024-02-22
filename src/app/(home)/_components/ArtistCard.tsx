@@ -61,7 +61,8 @@ export const ArtistCard = (props: ArtistCardProps) => {
       <div className="absolute w-full h-full bg-gradient-to-t from-white" />
       {!isLoading ? (
         <div className="absolute flex flex-col items-center h-full w-full pt-[calc(100%/2/2/2)] pb-[calc(100%/2/2/2/2)] px-[calc(100%/2/2/2/2/2)]">
-          <div className="flex relative w-1/2 aspect-square rounded-lg shadow-md overflow-hidden">
+          {/* @TODO - rounded-lg */}
+          <div className="flex relative w-1/2 aspect-square shadow-md overflow-hidden">
             {artist?.spotifyImageUrl ? (
               <Image
                 src={artist?.spotifyImageUrl}

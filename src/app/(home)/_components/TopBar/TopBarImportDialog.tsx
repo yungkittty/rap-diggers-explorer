@@ -118,7 +118,7 @@ const TopBarImportDialogItem = (props: TopBarImportDialogItemProps) => {
   } = playlistStatus.playlist;
   return (
     <div className="flex flex-row items-center py-1.5 px-3 mb-3 border rounded-md">
-      <Avatar>
+      <Avatar className="rounded-none">
         <AvatarImage src={spotifyImageUrl} />
         <AvatarFallback>{spotifyName}</AvatarFallback>
       </Avatar>

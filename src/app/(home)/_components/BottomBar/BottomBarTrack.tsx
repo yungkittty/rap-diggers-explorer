@@ -23,7 +23,8 @@ export const BottomBarTrack = (props: BottomBarTrackProps) => {
     <div className="flex flex-row flex-1">
       {isInitialLoading || isLoading || trackCurrent ? (
         <>
-          <div className="flex shrink-0 relative h-full aspect-square rounded-md overflow-hidden">
+          {/* @TODO - rounded-md */}
+          <div className="flex shrink-0 relative h-full aspect-square  overflow-hidden">
             <div className="flex flex-1 bg-foreground/10 animate-pulse" />
             {trackCurrent?.spotifyImageUrl ? (
               <Image
