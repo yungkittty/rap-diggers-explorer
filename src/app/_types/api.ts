@@ -6,14 +6,16 @@ export type API_Ouput = {
 };
 
 //
-// API/POST - /api/playlists
+// API/POST - /api/playlists/create-and-import
 //
 
-export const POST_PlaylistsInputSchema = z.object({
+export const POST_PlaylistsCreateAndImportInputSchema = z.object({
   spotifyPlaylistId: z.string(),
 });
-export type POST_PlaylistsInput = z.infer<typeof POST_PlaylistsInputSchema>;
-export type POST_PlaylistsOutput = API_Ouput & {};
+export type POST_PlaylistsCreateAndImportInput = z.infer<
+  typeof POST_PlaylistsCreateAndImportInputSchema
+>;
+export type POST_PlaylistsCreateAndImportOutput = API_Ouput & {};
 
 //
 // API/POST - /api/playlists/import
@@ -28,6 +30,44 @@ export type POST_PlaylistsImportOutput = API_Ouput & {};
 export type GET_PlaylistsIsImportableOutput = {
   isImportable: boolean;
 };
+
+//
+// API/POST - /api/playlist-status
+//
+
+export const POST_PlaylistStatusInputSchema = z.object({
+  spotifyPlaylistId: z.string(),
+});
+export type POST_PlaylistStatusInput = z.infer<
+  typeof POST_PlaylistStatusInputSchema
+>;
+export type POST_PlaylistStatusOutput = API_Ouput & {};
+
+//
+// API/GET - /api/playlist-status
+//
+
+export type GET_PlaylistStatusOutputDataItem = {
+  id: string;
+  playlist: {
+    spotifyId: string;
+    spotifyName: string;
+    spotifyOwnerId: string;
+    spotifyOwnerName: string;
+    spotifyTracksTotal: number;
+    spotifyUrl: string;
+    spotifyImageUrl?: string;
+  };
+};
+export type GET_PlaylistStatusOutput = API_Ouput & {
+  data?: GET_PlaylistStatusOutputDataItem[];
+};
+
+//
+// API/DELETE - /api/playlist-status/[playlist-status-id]
+//
+
+export type DELETE_PlaylistStatusOutput = API_Ouput & {};
 
 //
 // API/GET - /api/artist-status

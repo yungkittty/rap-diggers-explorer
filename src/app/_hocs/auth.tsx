@@ -7,6 +7,7 @@ import { signOutServerSide } from "../_utils/auth";
 
 export const withAuth = (Component: React.ComponentType<any>) => {
   const displayName = Component.displayName || "Component";
+  return Component;
   const WithComponent = async () => {
     const pathname = headers().get("x-pathname");
 

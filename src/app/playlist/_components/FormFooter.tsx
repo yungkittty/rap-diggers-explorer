@@ -1,25 +1,26 @@
 "use client";
 
 import { Icon } from "@/app/_components/Icon";
+import { InputPlaylist } from "@/app/_components/InputPlaylist";
 import { useToast } from "@/app/_components/ui/use-toast";
 import { ErrorCode } from "@/app/_constants/error-code";
+import { SPOTIFY_PLAYLIST_MAX_TRACKS } from "@/app/_constants/spotify";
 import type {
-  POST_PlaylistsInput,
-  POST_PlaylistsOutput,
+  POST_PlaylistsCreateAndImportInput,
+  POST_PlaylistsCreateAndImportOutput,
 } from "@/app/_types/api";
 import { CustomError } from "@/app/_utils/errors";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import useSWRMutation from "swr/mutation";
 import { Text } from "../../_components/Text";
 import { Button } from "../../_components/ui/button";
 import { CardFooter } from "../../_components/ui/card";
-import { Input } from "../../_components/ui/input";
 
 const postPlaylists = async (
   url: string, //
-  { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsInput },
-): Promise<POST_PlaylistsOutput> => {
+  { arg: { spotifyPlaylistId } }: { arg: POST_PlaylistsCreateAndImportInput },
+): Promise<POST_PlaylistsCreateAndImportOutput> => {
   const options: RequestInit = {
     method: "POST", //
     headers: {
@@ -40,12 +41,9 @@ const postPlaylists = async (
 
 export const FormFooter = () => {
   const [value, setValue] = useState("");
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(event.target.value);
-    },
-    [],
-  );
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value);
+  };
 
   const router = useRouter();
   const handleSuccess = () => {
@@ -58,7 +56,7 @@ export const FormFooter = () => {
       case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
         toast({
           title: "Erreur",
-          description: "Ta playlist contient plus de 1000 titres !",
+          description: `Ta playlist contient plus de ${SPOTIFY_PLAYLIST_MAX_TRACKS} morceaux !`,
         });
         break;
       }
@@ -87,34 +85,26 @@ export const FormFooter = () => {
     onError: handleError,
   };
   const { trigger, isMutating } = useSWRMutation(
-    "/api/playlists", //
+    "/api/playlists/create-and-import", //
     postPlaylists,
     configutation,
   );
 
+  const isDisabled = isMutating || !Boolean(value);
   const handleClick = async () => {
-    if (!value || isMutating) {
+    if (isDisabled) {
       return;
     }
     await trigger({ spotifyPlaylistId: value });
   };
 
-  const isDisabled = isMutating || !Boolean(value);
   return (
     <CardFooter className="flex flex-col">
-      <div className="relative w-full">
-        <div className="absolute flex h-full w-1/2 items-center justify-center rounded-l-md border border-solid border-input bg-primary/5">
-          <Text className="text-base text-primary/50">
-            https://open.spotify.com/playlist/
-          </Text>
-        </div>
-        <Input
-          className="pl-[calc(50%+8px)] text-base text-primary focus-visible:ring-ring/90"
-          value={value}
-          onChange={handleChange}
-          spellCheck={false}
-        />
-      </div>
+      <InputPlaylist
+        className="w-full" //
+        value={value}
+        onChange={handleChange}
+      />
       <Button
         className="mt-2.5 w-full"
         size="lg"

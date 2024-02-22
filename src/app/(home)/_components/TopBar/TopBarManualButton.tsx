@@ -50,7 +50,7 @@ export const TopBarManualButton = () => {
             <div className="absolute right-[-3.5px] top-[-2.5px] h-3 aspect-square rounded-full shadow-xs bg-foreground" />
           ) : null}
           <Button variant="outline" size="icon" onClick={handleClick}>
-            <Icon name="book" filled />
+            <Icon className="text-xl" name="book" filled />
           </Button>
         </div>
       </DialogTrigger>

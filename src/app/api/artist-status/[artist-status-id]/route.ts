@@ -92,10 +92,10 @@ export const PUT = withRate(
 
       const spotifyArtistId = artistStatus.artist.spotifyId;
 
-      let spotifyArtistIds: string[] = [];
+      let spotifyRelatedIds: string[] = [];
       if (action === "dig-in" || action === "like") {
         try {
-          spotifyArtistIds = await getSpotifyArtistRelatedIds(
+          spotifyRelatedIds = await getSpotifyArtistRelatedIds(
             spotifyApi, //
             spotifyArtistId,
           );
@@ -187,7 +187,7 @@ export const PUT = withRate(
         await upsertArtistStatus(
           tx, //
           userId,
-          spotifyArtistIds,
+          spotifyRelatedIds,
           { parentId, batchId, score: 0 },
         );
 

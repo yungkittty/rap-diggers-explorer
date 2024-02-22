@@ -1,7 +1,7 @@
 import { EventSchemas, Inngest } from "inngest";
 
 export type InngestEvents = {
-  "spotify.related.imported": {
+  "spotify.related.loaded": {
     data: {
       user_id: string;
       spotify_artist_ids: string[];
