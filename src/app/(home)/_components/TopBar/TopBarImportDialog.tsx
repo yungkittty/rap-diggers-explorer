@@ -122,7 +122,7 @@ const TopBarImportDialogItem = (props: TopBarImportDialogItemProps) => {
         <AvatarImage src={spotifyImageUrl} />
         <AvatarFallback>{spotifyName}</AvatarFallback>
       </Avatar>
-      <div className="flex flex-col ml-3">
+      <div className="flex flex-col ml-2.5">
         <div className="flex flex-row">
           <Text className="text-sm text-primary uppercase tracking-tight">
             {spotifyName}
