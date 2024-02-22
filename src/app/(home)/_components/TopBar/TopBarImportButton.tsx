@@ -5,20 +5,24 @@ import { Text } from "@/app/_components/Text";
 import { Button } from "@/app/_components/ui/button";
 import {
   Tooltip,
+  TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/app/_components/ui/tooltip";
 import { useToast } from "@/app/_components/ui/use-toast";
 import { ErrorCode } from "@/app/_constants/error-code";
+import { SPOTIFY_PLAYLIST_MAX_TRACKS } from "@/app/_constants/spotify";
 import { cn } from "@/app/_libs/shadcn";
 import {
   GET_PlaylistsIsImportableOutput,
   POST_PlaylistsImportOutput,
 } from "@/app/_types/api";
 import { CustomError } from "@/app/_utils/errors";
+import { useState } from "react";
 import { useSWRConfig } from "swr";
 import useSWRImmutable from "swr/immutable";
 import useSWRMutation from "swr/mutation";
+import { TopBarImportDialog } from "./TopBarImportDialog";
 
 const getPlaylistsIsImportable = async (
   url: string,
@@ -64,22 +68,30 @@ export const TopBarImportButton = () => {
   );
   const isImportable = data?.isImportable;
 
-  const { toast } = useToast();
+  const [isMutating, setIsMutating] = useState(false);
 
-  const handleSuccess = () => {
+  const { toast } = useToast();
+  const { mutate: mutateGlobal } = useSWRConfig();
+
+  const handleSuccess = async () => {
+    await Promise.allSettled([
+      mutate(),
+      mutateGlobal(["/api/artist-status", null]),
+    ]);
+    setIsMutating(false);
     toast({
       title: "Succès 🚀",
-      description: "Tes nouveaux artistes ont été importés !",
+      description: "Tes propositions ont été mises à jour !",
     });
-    return;
   };
 
   const handleError = (error: CustomError) => {
+    setIsMutating(false);
     switch (error.code) {
       case ErrorCode.USER_FORBIDDEN_MAX_TRACKS: {
         toast({
           title: "Erreur",
-          description: "Ta playlist contient plus de 1000 titres !",
+          description: `Une playlist contient plus de ${SPOTIFY_PLAYLIST_MAX_TRACKS} morceaux !`,
         });
         break;
       }
@@ -102,67 +114,87 @@ export const TopBarImportButton = () => {
     }
   };
 
-  const { mutate: mutateGlobal } = useSWRConfig();
   const configuration = {
     throwOnError: false,
     onSuccess: handleSuccess,
     onError: handleError,
   };
-  const { trigger, isMutating } = useSWRMutation(
+  const { trigger } = useSWRMutation(
     "/api/playlists/import", //
     postPlaylistsImport,
     configuration,
   );
+
+  const isDisabled = isMutating || isImportable !== true;
   const handleClick = async () => {
-    if (isImportable !== true || isMutating) {
+    if (isDisabled) {
       return;
     }
+    setIsMutating(true);
     await trigger();
-    await mutate({ isImportable: false });
-    await mutateGlobal(["/api/artist-status", null]);
   };
 
-  const isDisabled = isImportable !== true;
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            // This allows tooltip to be triggered!
-            className={cn({ "opacity-50 cursor-default": isDisabled })}
-            variant="secondary"
-            onClick={handleClick}
-            // disabled={isDisabled}
-          >
-            <div
+    <div className="flex flex-row items-center">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              // This allows tooltip to be triggered!
               className={cn(
-                "flex flex-row items-center", //
-                { "opacity-0": isMutating },
+                { "opacity-50 cursor-default": isDisabled }, //
               )}
+              variant="secondary"
+              onClick={handleClick}
+              // disabled={isDisabled}
             >
-              <Text className="font-bold uppercase leading-none">
-                mettre-à-jour
+              <div
+                className={cn(
+                  "flex flex-row items-center", //
+                  { "opacity-0": isMutating },
+                )}
+              >
+                <Text className="font-bold uppercase leading-none">
+                  mettre-à-jour
+                </Text>
+              </div>
+              <Icon
+                className={cn(
+                  "absolute animate-spin", //
+                  { "opacity-0": !isMutating },
+                )}
+                name="loader-4"
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent
+            side="bottom" //
+            sideOffset={4 * 1.5}
+            align="center"
+            alignOffset={-2}
+          >
+            {!isDisabled ? (
+              <Text className="text-sm text-primary">
+                Mets à jour tes propositions avec tes playlists.
               </Text>
-              <Icon className="ml-2.5 text-lg" name="loop-left" />
-            </div>
-            <Icon
-              className={cn(
-                "absolute animate-spin", //
-                { "opacity-0": !isMutating },
-              )}
-              name="loader-4"
-            />
-          </Button>
-        </TooltipTrigger>
-        {/* @TODO - ... */}
-        {/* {isImportable === false ? (
-          <TooltipContent align="end" sideOffset={2 * 4}>
-            <Text className="text-primary text-base">
-              Il est possible d’importer qu’une seul fois par jour
-            </Text>
+            ) : (
+              <Text className="text-sm text-primary">
+                Tu peux mettre à jour une fois par jour max.
+              </Text>
+            )}
           </TooltipContent>
-        ) : null} */}
-      </Tooltip>
-    </TooltipProvider>
+        </Tooltip>
+      </TooltipProvider>
+      <TopBarImportDialog>
+        <Button
+          className="ml-1.5"
+          variant="secondary"
+          size="icon"
+          disabled={isMutating}
+        >
+          <Icon className="text-lg" name="play-list-add" />
+        </Button>
+      </TopBarImportDialog>
+    </div>
   );
 };

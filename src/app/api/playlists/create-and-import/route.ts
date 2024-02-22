@@ -1,7 +1,7 @@
 import { ErrorCode } from "@/app/_constants/error-code";
 import prisma from "@/app/_libs/prisma";
-import type { POST_PlaylistsInput } from "@/app/_types/api";
-import { POST_PlaylistsInputSchema } from "@/app/_types/api";
+import type { POST_PlaylistsCreateAndImportInput } from "@/app/_types/api";
+import { POST_PlaylistsCreateAndImportInputSchema } from "@/app/_types/api";
 import { getBatchs } from "@/app/_utils/arrays";
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
@@ -17,11 +17,11 @@ import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export const POST_PLAYLISTS_IMPORT_BATCH_SIZE = 5;
 export const POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS = 60_000; // 60 second(s)
-export const preloadRelatedIds = async (
+export const loadRelatedIds = async (
   userId: string,
   spotifyApi: SpotifyApi,
   spotifyArtistIds: string[],
-): Promise<string[][]> => {
+): Promise<[string[][], () => Promise<void>]> => {
   const [
     spotifyArtistIdsBatch = [], //
     ...othersSpotifyArtistIdsBatchs
@@ -30,27 +30,7 @@ export const preloadRelatedIds = async (
     POST_PLAYLISTS_IMPORT_BATCH_SIZE,
   );
 
-  if (othersSpotifyArtistIdsBatchs.length) {
-    await inngest.send(
-      othersSpotifyArtistIdsBatchs.map(
-        (
-          spotifyArtistIdsBatch, //
-          spotifyArtistIdsBatchIndex,
-        ) => ({
-          name: "spotify.related.imported",
-          data: {
-            user_id: userId, //
-            spotify_artist_ids: spotifyArtistIdsBatch,
-            delay_in_ms:
-              POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS *
-              (spotifyArtistIdsBatchIndex + 1),
-          },
-        }),
-      ),
-    );
-  }
-
-  const spotifyRelatedIdsBatchs: string[][] = [];
+  let spotifyRelatedIdsBatchs: string[][] = [];
   for (const spotifyArtistId of spotifyArtistIdsBatch) {
     try {
       const spotifyRelatedIds = await getSpotifyArtistRelatedIds(
@@ -63,14 +43,33 @@ export const preloadRelatedIds = async (
       throw error;
     }
   }
-
-  return spotifyRelatedIdsBatchs.filter(
+  spotifyRelatedIdsBatchs = spotifyRelatedIdsBatchs.filter(
     (spotifyRelatedIdsBatch) => Boolean(spotifyRelatedIdsBatch.length), //
   );
+
+  const lazyRelatedIds = async () => {
+    if (!othersSpotifyArtistIdsBatchs.length) {
+      return;
+    }
+    await inngest.send(
+      othersSpotifyArtistIdsBatchs.map(
+        (spotifyArtistIds, spotifyArtistIdsIndex) => ({
+          name: "spotify.related.loaded",
+          data: {
+            user_id: userId, //
+            spotify_artist_ids: spotifyArtistIds,
+            delay_in_ms: POST_PLAYLISTS_IMPORT_BATCH_DELAY_IN_MS * spotifyArtistIdsIndex, // prettier-ignore
+          },
+        }),
+      ),
+    );
+  };
+
+  return [spotifyRelatedIdsBatchs, lazyRelatedIds];
 };
 
 export const POST = withRate(
-  { weight: 20 + POST_PLAYLISTS_IMPORT_BATCH_SIZE },
+  { weight: 10 + POST_PLAYLISTS_IMPORT_BATCH_SIZE },
   withAuth(
     async (
       request, //
@@ -79,7 +78,7 @@ export const POST = withRate(
       spotifyApi,
     ) => {
       const data = await request.json();
-      if (!POST_PlaylistsInputSchema.safeParse(data).success) {
+      if (!POST_PlaylistsCreateAndImportInputSchema.safeParse(data).success) {
         return Response.json(
           { error: ErrorCode.INPUT_INVALID }, //
           { status: 400 },
@@ -87,12 +86,8 @@ export const POST = withRate(
       }
 
       const playlistStatus = await prisma.playlistStatus.findMany({
-        select: {
-          id: true,
-        },
-        where: {
-          userId,
-        },
+        select: { id: true },
+        where: { userId },
       });
       if (playlistStatus.length) {
         return Response.json(
@@ -101,7 +96,7 @@ export const POST = withRate(
         );
       }
 
-      const { spotifyPlaylistId } = data as POST_PlaylistsInput;
+      const { spotifyPlaylistId } = data as POST_PlaylistsCreateAndImportInput;
       let spotifyArtistIds: string[] = [];
       try {
         spotifyArtistIds = await getSpotifyPlaylistArtistIds(
@@ -127,12 +122,16 @@ export const POST = withRate(
       }
 
       let spotifyRelatedIdsBatchs: string[][] = [];
+      let lazyRelatedIds: () => Promise<void> = async () => {};
       try {
-        spotifyRelatedIdsBatchs = await preloadRelatedIds(
-          userId, //
-          spotifyApi,
-          spotifyArtistIds,
-        );
+        const [spotifyRelatedIdsBatchs_, lazyRelatedIds_] =
+          await loadRelatedIds(
+            userId, //
+            spotifyApi,
+            spotifyArtistIds,
+          );
+        spotifyRelatedIdsBatchs = spotifyRelatedIdsBatchs_;
+        lazyRelatedIds = lazyRelatedIds_;
       } catch (error) {
         console.log(error);
         return Response.json(
@@ -188,6 +187,8 @@ export const POST = withRate(
         { timeout: 10_000 },
       );
 
+      // This loads lazy only once all data is saved!
+      await lazyRelatedIds();
       return Response.json(
         {}, //
         { status: 200 },

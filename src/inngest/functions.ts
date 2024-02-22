@@ -8,23 +8,21 @@ import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuthInngest } from "@/app/_utils/auth";
 import { withRateInngest } from "@/app/_utils/rate";
 import { getSpotifyArtistRelatedIds } from "@/app/_utils/spotify";
-import { POST_PLAYLISTS_IMPORT_BATCH_SIZE } from "@/app/api/playlists/route";
+import { POST_PLAYLISTS_IMPORT_BATCH_SIZE } from "@/app/api/playlists/create-and-import/route";
 import { createId } from "@paralleldrive/cuid2";
 import { RetryAfterError } from "inngest";
 import { inngest } from "./client";
 
-export const importRelated = inngest.createFunction(
+export const loadRelated = inngest.createFunction(
   {
-    id: "import-related",
+    id: "load-related",
     concurrency: {
       key: "event.data.user_id",
       limit: 1,
     },
     retries: INNGEST_MAX_RETRIES,
   },
-  {
-    event: "spotify.related.imported", //
-  },
+  { event: "spotify.related.loaded" },
   async (params) => {
     const {
       step,
@@ -39,10 +37,10 @@ export const importRelated = inngest.createFunction(
       logger,
     } = params;
     if (attempt === 0) await step.sleep("wait-for-delay", delayInMs);
-    return withRateInngest<"spotify.related.imported">(
+    return withRateInngest<"spotify.related.loaded">(
       { weight: POST_PLAYLISTS_IMPORT_BATCH_SIZE }, //
       async (params) => {
-        return withAuthInngest<"spotify.related.imported">(
+        return withAuthInngest<"spotify.related.loaded">(
           userId, //
           async (_, spotifyApi) => {
             const spotifyRelatedIdsBatchs: string[][] = [];

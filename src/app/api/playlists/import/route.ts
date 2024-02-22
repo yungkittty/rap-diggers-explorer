@@ -1,4 +1,5 @@
 import { ErrorCode } from "@/app/_constants/error-code";
+import { USER_MAX_PLAYLISTS } from "@/app/_constants/user";
 import prisma from "@/app/_libs/prisma";
 import { upsertArtistStatus } from "@/app/_utils/artist-status";
 import { withAuth } from "@/app/_utils/auth";
@@ -7,10 +8,13 @@ import { isImportable } from "@/app/_utils/playlists";
 import { withRate } from "@/app/_utils/rate";
 import { getSpotifyPlaylistArtistIds } from "@/app/_utils/spotify";
 import { createId } from "@paralleldrive/cuid2";
-import { preloadRelatedIds } from "../route";
+import {
+  POST_PLAYLISTS_IMPORT_BATCH_SIZE,
+  loadRelatedIds,
+} from "../create-and-import/route";
 
 export const POST = withRate(
-  { weight: 20 },
+  { weight: USER_MAX_PLAYLISTS * 10 + POST_PLAYLISTS_IMPORT_BATCH_SIZE },
   withAuth(
     async (
       request, //
@@ -41,6 +45,13 @@ export const POST = withRate(
           subscribedAt: { sort: "asc", nulls: "first" },
         },
       });
+      if (playlistStatus.length >= USER_MAX_PLAYLISTS) {
+        return Response.json(
+          { error: ErrorCode.USER_FORBIDDEN_MAX_PLAYLISTS }, //
+          { status: 403 },
+        );
+      }
+
       const spotifyPlaylistIds = playlistStatus.map(
         (playlistStatus) => playlistStatus.playlist.spotifyId,
       );
@@ -85,12 +96,16 @@ export const POST = withRate(
       ];
 
       let spotifyRelatedIdsBatchs: string[][] = [];
+      let lazyRelatedIds: () => Promise<void> = async () => {};
       try {
-        spotifyRelatedIdsBatchs = await preloadRelatedIds(
-          userId, //
-          spotifyApi,
-          spotifyArtistIds,
-        );
+        const [spotifyRelatedIdsBatchs_, lazyRelatedIds_] =
+          await loadRelatedIds(
+            userId, //
+            spotifyApi,
+            spotifyArtistIds,
+          );
+        spotifyRelatedIdsBatchs = spotifyRelatedIdsBatchs_;
+        lazyRelatedIds = lazyRelatedIds_;
       } catch (error) {
         console.log(error);
         return Response.json(
@@ -128,6 +143,8 @@ export const POST = withRate(
         { timeout: 10_000 },
       );
 
+      // This loads lazy only once all data is saved!
+      await lazyRelatedIds();
       return Response.json(
         {}, //
         { status: 200 },

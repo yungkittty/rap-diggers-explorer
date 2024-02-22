@@ -8,7 +8,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogTitle,
   AlertDialogTrigger,
@@ -119,17 +118,15 @@ export const TopBarAvatarMenu = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AlertDialogContent className="w-[550px] gap-4">
+      <AlertDialogContent className="w-[550px] min-w-[550px] gap-4">
         <AlertDialogTitle>
           <Heading>Est-ce que tu es sûr ?</Heading>
         </AlertDialogTitle>
-        <AlertDialogDescription>
-          <Text className="text-base text-primary/70 mb-0.5">
-            Si tu décides de te désinscrire, ton compte sera supprimé ainsi que
-            l’ensemble des données qui y sont associées, et cela de manière
-            irréversible. <span className="text-primary">😵‍💫</span>
-          </Text>
-        </AlertDialogDescription>
+        <Text className="text-base text-primary/70 mb-0.5">
+          Si tu décides de te désinscrire, ton compte sera supprimé ainsi que
+          l’ensemble des données qui y sont associées, et cela de manière
+          irréversible. <span className="text-primary">😵‍💫</span>
+        </Text>
         <AlertDialogFooter className="gap-0.5">
           <AlertDialogCancel className="flex-1">
             <Text className="font-bold uppercase leading-none">Non</Text>
