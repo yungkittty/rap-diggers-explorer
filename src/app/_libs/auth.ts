@@ -18,7 +18,7 @@ export const {
       clientSecret: SPOTIFY_CLIENT_SECRET,
       // This makes sure scope is the minimum required!
       // https://developer.spotify.com/documentation/web-api/concepts/scopes
-      authorization: "https://accounts.spotify.com/authorize?scope=playlist-read-private", // prettier-ignore
+      authorization: "https://accounts.spotify.com/authorize?scope=playlist-read-private playlist-read-collaborative", // prettier-ignore
       account(tokens) {
         // This makes sure expires_in is also returned!
         return tokens;
