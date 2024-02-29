@@ -54,9 +54,11 @@ export const getSpotifyPlaylistArtistIds = async (
   const spotifyArtistIdsSet = new Set<string>([]);
   for (const spotifyPlaylistItem of spotifyPlaylistItems) {
     const spotifyPlaylistTrack = spotifyPlaylistItem.track as SimplifiedTrack;
-    const spotifyArtists = spotifyPlaylistTrack.artists;
-    for (const spotifyArtist of spotifyArtists) {
-      spotifyArtistIdsSet.add(spotifyArtist.id);
+    if (spotifyPlaylistTrack) {
+      const spotifyArtists = spotifyPlaylistTrack.artists;
+      for (const spotifyArtist of spotifyArtists) {
+        spotifyArtistIdsSet.add(spotifyArtist.id);
+      }
     }
   }
 
