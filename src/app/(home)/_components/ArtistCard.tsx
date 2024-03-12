@@ -1,8 +1,8 @@
 "use client";
 
 import { Heading } from "@/app/_components/Heading";
-import { Icon } from "@/app/_components/Icon";
 import { Image } from "@/app/_components/Image";
+import { SpotifyButton } from "@/app/_components/SpotifyButton";
 import { Text } from "@/app/_components/Text";
 import { Card } from "@/app/_components/ui/card";
 import { cn } from "@/app/_libs/shadcn";
@@ -26,7 +26,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
     <Card
       className={cn(
         "flex flex-col h-full aspect-[4/5] overflow-hidden shadow transition-shadow duration-700",
-        { "shadow-md": isFocused },
+        { shadow: isFocused },
         className,
       )}
     >
@@ -62,7 +62,7 @@ export const ArtistCard = (props: ArtistCardProps) => {
       {!isLoading ? (
         <div className="absolute flex flex-col items-center h-full w-full pt-[calc(100%/2/2/2)] pb-[calc(100%/2/2/2/2)] px-[calc(100%/2/2/2/2/2)]">
           {/* @TODO - rounded-lg */}
-          <div className="flex relative w-1/2 aspect-square shadow-md overflow-hidden">
+          <div className="flex relative w-1/2 aspect-square shadow overflow-hidden">
             {artist?.spotifyImageUrl ? (
               <Image
                 src={artist?.spotifyImageUrl}
@@ -85,16 +85,11 @@ export const ArtistCard = (props: ArtistCardProps) => {
                   ).format(artist?.spotifyFollowersTotal)
                 : null}
             </Text>
-            <Text className="mt-0.5 text-xs tall:text-sm text-primary/70 uppercase">
+            <Text className="tall:mt-0.5 text-xs tall:text-sm text-primary/60 uppercase">
               abonné·e·s
             </Text>
           </div>
-          <a className="flex mt-auto" href={artist?.spotifyUrl} target="_blank">
-            <Icon
-              className="text-3xl text-primary hover:text-spotify transition-colors leading-none"
-              name="spotify"
-            />
-          </a>
+          <SpotifyButton className="mt-auto" url={artist?.spotifyUrl} />
         </div>
       ) : null}
       <div

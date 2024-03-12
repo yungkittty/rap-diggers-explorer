@@ -117,7 +117,7 @@ const TopBarImportDialogItem = (props: TopBarImportDialogItemProps) => {
     spotifyImageUrl,
   } = playlistStatus.playlist;
   return (
-    <div className="flex flex-row items-center py-1.5 px-3 mb-3 border rounded-md">
+    <div className="flex flex-row items-center py-1.5 px-3 mb-3 border rounded-md bg-background">
       <Avatar className="rounded-none">
         <AvatarImage src={spotifyImageUrl} />
         <AvatarFallback>{spotifyName}</AvatarFallback>
@@ -299,7 +299,7 @@ export const TopBarImportDialog = (props: TopBarImportDialogProps) => {
         className="w-[550px] min-w-[550px] p-0 py-6"
         onOpenAutoFocus={handleOpenAutoFocus}
       >
-        <DialogHeader className="px-6 space-y-4">
+        <DialogHeader className="px-6 space-y-4 mb-1">
           <DialogTitle>
             <Heading>Abonne-toi à des playlists</Heading>
           </DialogTitle>
@@ -309,7 +309,7 @@ export const TopBarImportDialog = (props: TopBarImportDialogProps) => {
             <span className="ml-1 text-primary">🔌</span>
           </Text>
         </DialogHeader>
-        <div className="relative flex flex-col w-full h-[250px] p-3 pb-0 border-t border-b border-foreground/10 border-solid overflow-y-auto">
+        <div className="relative flex flex-col w-full h-[250px] p-3 pb-0 border-t border-b border-foreground/10 border-solid overflow-y-auto bg-[hsl(var(--foreground)/0.0125)]">
           {isLoading ? (
             <div className="absolute z-10 flex h-full w-full justify-center items-center ml-[-12px] mt-[-12px] bg-background">
               <Icon
@@ -326,7 +326,7 @@ export const TopBarImportDialog = (props: TopBarImportDialogProps) => {
             />
           ))}
         </div>
-        <DialogFooter className="flex sm:flex-col sm:space-x-0 px-6 mt-1">
+        <DialogFooter className="flex sm:flex-col sm:space-x-0 px-6 mt-2">
           <InputPlaylist
             className="w-full" //
             value={value}
